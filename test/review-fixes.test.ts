@@ -138,3 +138,11 @@ test('R11: duplicate waiting ids, closed before refined, and very long notes are
 test('R11: a byte-order mark from a Windows editor is accepted', () => {
   assert.equal(checkRecord('﻿' + JSON.stringify(load()), { now: NOW }).ok, true);
 });
+
+test('Demo finding: one message per field, and dates in messages stay readable', () => {
+  const rec = load(); waiting0(rec).text = '';
+  const errs = check(rec).errors.filter((e) => e.startsWith('waiting[0].text'));
+  assert.equal(errs.length, 1, errs.join(' | '));
+  const f = load(); f.writtenAt = '2026-12-01T00:00:00Z';
+  assert.match(check(f).errors.join('\n'), /2026-12-01T00:00:00Z/);
+});

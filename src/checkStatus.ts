@@ -89,7 +89,7 @@ function explain(e: ErrorObject, record: unknown): string {
 /** A short, harmless rendering of a value for a message: never the input in full. */
 function shown(v: unknown): string {
   const s = typeof v === 'string' ? v : JSON.stringify(v) ?? String(v);
-  const safe = s.replace(/[^A-Za-z0-9 ._-]/g, '?');
+  const safe = s.replace(/[^A-Za-z0-9 ._:+-]/g, '?');
   return `"${safe.length > 40 ? `${safe.slice(0, 40)}...` : safe}"`;
 }
 
@@ -161,9 +161,13 @@ export function checkRecord(text: string, options: { now?: Date } = {}): CheckRe
     );
 
   if (!validate(rec)) {
+    // One message per field: the first problem found is enough to fix it.
+    const reported = new Set<string>();
     for (const e of validate.errors ?? []) {
-      const msg = explain(e, rec);
-      if (!errors.includes(msg)) errors.push(msg);
+      const key = e.keyword === 'required' || e.keyword === 'additionalProperties' ? `${e.instancePath}#${JSON.stringify(e.params)}` : e.instancePath;
+      if (reported.has(key)) continue;
+      reported.add(key);
+      errors.push(explain(e, rec));
     }
   }
 
