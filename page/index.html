@@ -117,9 +117,8 @@ dash.draw('cards', (el) => {
       }
       card.append(ul);
     }
-    const meta = make('p', 'po-muted');
-    meta.append(document.createTextNode([c.lastActivityText, c.ageText].filter(Boolean).join(' · ')));
-    card.append(meta);
+    const metaText = [c.lastActivityText, c.ageText].filter(Boolean).join(' · ');
+    if (metaText) card.append(make('p', 'po-muted', metaText));
     if (c.notes) card.append(make('p', 'po-note', c.notes));
     if (c.links.length) {
       const links = make('div', 'po-links');

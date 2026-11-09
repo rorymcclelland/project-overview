@@ -61,3 +61,9 @@ test('S5: only checked addresses become links; markup in records stays text', ()
   assert.equal(doc.querySelectorAll('img, b:not([data-draw])').length, 0);
   assert.match(doc.querySelector('.po-card h2')!.textContent ?? '', /<img/);
 });
+
+test('Demo finding: a card with no record has no empty line where its age would be', () => {
+  const doc = render([row({ id: 'n', name: 'N', noRecord: true, writtenAt: null, lastActivity: null, sprint: null, stage: null, stories: null })], []);
+  const empty = [...doc.querySelectorAll('.po-card p')].filter((p) => !(p.textContent ?? '').trim());
+  assert.equal(empty.length, 0);
+});
