@@ -5,8 +5,8 @@
     "name": "Project Overview",
     "kind": "sprint"
   },
-  "writtenAt": "2026-11-09T20:15:46Z",
-  "writtenBy": "Project Overview session, Sprint 3 refinement",
+  "writtenAt": "2026-11-09T20:35:22Z",
+  "writtenBy": "Project Overview session, Sprint 3 answers",
   "lastActivity": "2026-11-09",
   "links": {
     "repo": "https://github.com/rorymcclelland/project-overview",
@@ -15,59 +15,35 @@
   "sprint": {
     "number": "3",
     "title": "Answer in place",
-    "stage": "awaiting-answers",
+    "stage": "ready",
     "stageSince": "2026-11-09",
     "stories": [
       {
         "id": "O3-1",
         "title": "Answer from the inbox",
         "size": "M",
-        "status": "Refined, awaiting answers"
+        "status": "Ready, Sprint 3"
       },
       {
         "id": "O3-2",
         "title": "Projects pick up answers",
         "size": "M",
-        "status": "Refined, awaiting answers"
+        "status": "Ready, Sprint 3"
       },
       {
         "id": "O3-3",
         "title": "Nothing answered gets lost",
         "size": "S",
-        "status": "Refined, awaiting answers"
+        "status": "Ready, Sprint 3"
       }
     ]
   },
   "waiting": [
     {
-      "id": "S3-Q1",
+      "id": "GO3",
       "type": "question",
-      "text": "Which items can you answer from the inbox?",
-      "recommendation": "Questions, demo sign-offs, and done for account steps and hand checks; live deploy approvals stay in GitHub.",
-      "askedOn": "2026-11-09",
-      "source": "docs/refinement/sprint-3.md"
-    },
-    {
-      "id": "S3-Q2",
-      "type": "question",
-      "text": "When does a project pick up your answers?",
-      "recommendation": "At the start of every session in that project.",
-      "askedOn": "2026-11-09",
-      "source": "docs/refinement/sprint-3.md"
-    },
-    {
-      "id": "S3-Q3",
-      "type": "question",
-      "text": "Should saving an answer start anything in the project?",
-      "recommendation": "No: the answer waits for the project's next session, and the inbox shows it waiting.",
-      "askedOn": "2026-11-09",
-      "source": "docs/refinement/sprint-3.md"
-    },
-    {
-      "id": "S3-Q4",
-      "type": "question",
-      "text": "One button to agree with Claude's recommendation?",
-      "recommendation": "Yes, next to each recommendation; you can still type your own answer.",
+      "text": "Sprint 3 is refined and all four questions are answered: say go to start building.",
+      "recommendation": "Go.",
       "askedOn": "2026-11-09",
       "source": "docs/refinement/sprint-3.md"
     }

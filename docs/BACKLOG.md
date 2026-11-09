@@ -96,15 +96,15 @@ Refinement: `docs/refinement/sprint-2.md`. Demo: `docs/testing/sprint-2-demo.md`
 
 **Proposed for Sprint 3** (re-ranked at the close): answer in place, as planned, now designed by decision 0003. O-L1 stays a candidate until the GitHub connector is connected; spend and charts stay in their sprints.
 
-## Sprint 3: answer in place (refined 9 November 2026)
+## Sprint 3: answer in place (refined 9 November 2026, questions answered)
 
 Refinement: `docs/refinement/sprint-3.md`. Designed by decision 0003.
 
 | ID | Story | Acceptance criteria (summary) | Size | Status |
 |---|---|---|---|---|
-| O3-1 | Answer from the inbox | Answer an item where it is listed; saved privately to Rory, one per question; changeable until picked up; failures said plainly | M | Refined, awaiting answers (Q1, Q4) |
-| O3-2 | Projects pick up answers | A project's next session finds its answers, records them in its own files, marks them taken and clears them from the inbox | M | Refined, awaiting answers (Q2, Q3) |
-| O3-3 | Nothing answered gets lost | The inbox counts answers waiting for pickup and marks any waiting more than 7 days | S | Refined, awaiting answers |
+| O3-1 | Answer from the inbox | Answer an item where it is listed; saved privately to Rory, one per question; changeable until picked up; failures said plainly | M | Ready, Sprint 3 |
+| O3-2 | Projects pick up answers | A project's next session finds its answers, records them in its own files, marks them taken and clears them from the inbox | M | Ready, Sprint 3 |
+| O3-3 | Nothing answered gets lost | The inbox counts answers waiting for pickup and marks any waiting more than 7 days | S | Ready, Sprint 3 |
 
 ## Candidates after Sprint 2
 

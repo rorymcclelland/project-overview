@@ -1,6 +1,6 @@
 # Sprint 3 refinement: answer in place
 
-Refined 9 November 2026. Status: awaiting Rory's answers to Q1 to Q4. Designed by decision 0003 (spike S2-A).
+Refined 9 November 2026. Status: Ready, all questions answered 9 November 2026. Designed by decision 0003 (spike S2-A).
 
 ## What we know
 
@@ -102,3 +102,10 @@ Order: O3-1, then O3-2 (needs answers to exist), then O3-3. About two and a half
 **Q4. One button to agree with Claude's recommendation?**
 - (a) **Recommended:** yes, next to each recommendation; you can still type your own answer.
 - (b) No, always type the answer.
+
+## Rory's answers (9 November 2026)
+
+- **Q1 (a).** Questions (own answer or agree), demo sign-offs ("signed off" or "points to raise"), and "done" for account steps and hand checks, with an optional note. Live deploy approvals are linked, not answered here.
+- **Q2 (a).** A project picks up its answers at the start of every session.
+- **Q3 (a).** Saving starts nothing; the answer waits for the project's next session.
+- **Q4 (a).** One button to agree with the recommendation, beside it.
