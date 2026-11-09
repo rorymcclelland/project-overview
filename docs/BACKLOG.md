@@ -45,16 +45,16 @@ Refinement: `docs/refinement/sprint-0.md`. Demo: `docs/testing/sprint-0-demo.md`
 | R12 | A record ages as soon as its project moves on | Sprint 0 review; folded into O1-3, Sprint 1 |
 | F-4 | Waiting items include test packs only Rory can run; added a `hand-check` type to the format | Done, Sprint 0 (O0-3) |
 
-## Sprint 1: one view I can trust (refined 9 November 2026)
+## Sprint 1: one view I can trust (refined and built 9 November 2026, awaiting Rory's sign-off)
 
-Refinement: `docs/refinement/sprint-1.md`
+Refinement: `docs/refinement/sprint-1.md`. Demo: `docs/testing/sprint-1-demo.md`. Dashboard: the private artifact "Project overview"; refresh: `docs/refresh.md`.
 
 | ID | Story | Acceptance criteria (summary) | Size | Status |
 |---|---|---|---|---|
-| O1-1 | The refresh | Gathers each project's newest record from wherever it lives (any branch, Rory's PC, or the first records), checks it, and puts it in the page; folds in F-2 and F-3 | M | Ready, Sprint 1 |
-| O1-2 | The page | A private dashboard with one card per project: sprint, stage and since when, last activity, links, how many things wait on Rory; the website as a lighter card | M | Ready, Sprint 1 |
-| O1-3 | Nothing stale passes as current | Every card says how old its record is and flags a project that has moved on since; a missing or refused record is shown as such, with the reason; folds in R12 | S | Ready, Sprint 1 |
-| O1-4 | Refresh without asking | The refresh runs on a schedule as well as on request | S | Ready, Sprint 1 |
+| O1-1 | The refresh | Gathers each project's newest record from wherever it lives (any branch, Rory's PC, or the first records), checks it, and puts it in the page; folds in F-2 and F-3 | M | Built, Sprint 1: awaiting sign-off |
+| O1-2 | The page | A private dashboard with one card per project: sprint, stage and since when, last activity, links, how many things wait on Rory; the website as a lighter card | M | Built, Sprint 1: awaiting sign-off |
+| O1-3 | Nothing stale passes as current | Every card says how old its record is and flags a project that has moved on since; a missing or refused record is shown as such, with the reason; folds in R12 | S | Built, Sprint 1: awaiting sign-off |
+| O1-4 | Refresh without asking | The refresh runs on a schedule as well as on request | S | Built, Sprint 1: awaiting sign-off |
 
 ## Later sprints (one line each; refined just in time)
 
