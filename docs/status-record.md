@@ -25,7 +25,7 @@ In each project's repo at `docs/status.json`, written by that project's own sess
 | `sprint.stage` | One of: `refining`, `awaiting-answers` (questions to Rory open), `ready` (waiting for Rory's go), `building`, `awaiting-signoff` (demo ready), `closed` | Sprint projects only |
 | `sprint.stageSince` | The day the sprint reached that stage | Sprint projects only |
 | `sprint.stories` | Each story's `id`, `title`, `size` (S, M or L) and `status` as the backlog words it | Sprint projects only |
-| `waiting` | Everything waiting on Rory: each with `id`, `type` (`question`, `demo-signoff`, `deploy-approval` or `account-step`), `text`, Claude's `recommendation` where there is one, `askedOn`, and `source` (the file it came from) | Yes (may be empty) |
+| `waiting` | Everything waiting on Rory: each with `id`, `type` (`question`, `demo-signoff`, `deploy-approval`, `hand-check` (a test pack only Rory can run) or `account-step` (an account, setting or credential step that only Rory can take)), `text`, Claude's `recommendation` where there is one, `askedOn`, and `source` (the file it came from) | Yes (may be empty) |
 | `history` | Past sprints: `sprint`, `title`, `refined`, `closed`, and how many stories were `planned`, `done` and `returned` to the backlog | No |
 | `notes` | Anything else worth saying in a sentence | No |
 

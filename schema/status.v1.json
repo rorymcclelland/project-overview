@@ -66,7 +66,7 @@
         "required": ["id", "type", "text", "askedOn"],
         "properties": {
           "id": { "type": "string", "pattern": "^[A-Za-z0-9.-]{1,20}$" },
-          "type": { "enum": ["question", "demo-signoff", "deploy-approval", "account-step"] },
+          "type": { "enum": ["question", "demo-signoff", "deploy-approval", "hand-check", "account-step"] },
           "text": { "$ref": "#/definitions/longText" },
           "recommendation": { "$ref": "#/definitions/longText" },
           "askedOn": { "$ref": "#/definitions/date" },

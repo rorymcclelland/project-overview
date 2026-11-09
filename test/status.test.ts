@@ -106,6 +106,17 @@ test('O0-2 case 6: a waiting question with no text fails', () => {
   }
 });
 
+test('O0-2 case 4 (types): every waiting type is accepted, and an unknown one is refused with the list', () => {
+  for (const type of ['question', 'demo-signoff', 'deploy-approval', 'hand-check', 'account-step']) {
+    const rec = load('sprint-project.json');
+    (rec.waiting as Record<string, unknown>[])[0].type = type;
+    assert.equal(check(rec).ok, true, type);
+  }
+  const rec = load('sprint-project.json');
+  (rec.waiting as Record<string, unknown>[])[0].type = 'chore';
+  assert.match(check(rec).errors.join('\n'), /hand-check/);
+});
+
 test('O0-2 case 7: text with HTML or script passes, but is flagged to be shown as plain text', () => {
   const rec = load('sprint-project.json');
   (rec.waiting as Record<string, unknown>[])[0].text = 'Approve <script>alert(1)</script> <img src=x onerror=alert(2)>?';
