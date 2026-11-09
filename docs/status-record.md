@@ -47,6 +47,8 @@ At each of these moments, the project's session writes `docs/status.json` and ru
 
 For a kanban project, update the record when a change goes live or something starts waiting on Rory.
 
+**Then update the dashboard (agreed 9 November 2026, Sprint 2).** After committing a record, start the on-change refresh: fire the scheduled task "Project overview refresh (on change)", `trig_0198hB2JNRJQ4ReGzb8Uu7id`, with `fire_trigger`. It runs the same procedure as the daily refreshes (`docs/refresh.md`) on Rory's PC, and the dashboard shows the new record within minutes. If firing fails, say so in one line and carry on: the project's own work does not depend on it.
+
 Worked example (checked by the tests, so it stays correct):
 
 <!-- example:start -->

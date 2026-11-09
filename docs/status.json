@@ -1,0 +1,71 @@
+{
+  "version": 1,
+  "project": {
+    "id": "project-overview",
+    "name": "Project Overview",
+    "kind": "sprint"
+  },
+  "writtenAt": "2026-11-09T17:34:22Z",
+  "writtenBy": "Project Overview session, Sprint 2 build",
+  "lastActivity": "2026-11-09",
+  "links": {
+    "repo": "https://github.com/rorymcclelland/project-overview",
+    "backlog": "https://github.com/rorymcclelland/project-overview/blob/main/docs/BACKLOG.md"
+  },
+  "sprint": {
+    "number": "2",
+    "title": "What is waiting on me",
+    "stage": "building",
+    "stageSince": "2026-11-09",
+    "stories": [
+      {
+        "id": "O2-1",
+        "title": "Update on change",
+        "size": "S",
+        "status": "Ready, Sprint 2"
+      },
+      {
+        "id": "O2-2",
+        "title": "The inbox",
+        "size": "M",
+        "status": "Ready, Sprint 2"
+      },
+      {
+        "id": "S2-A",
+        "title": "Spike: saving answers in the page",
+        "size": "S",
+        "status": "Ready, Sprint 2 (spike)"
+      }
+    ]
+  },
+  "waiting": [
+    {
+      "id": "SK",
+      "type": "account-step",
+      "text": "Save the three skill changes (sprint-refine, sprint-close, build-working-agreement) from their review cards, so each project keeps its own status record and updates the dashboard.",
+      "recommendation": "Save all three.",
+      "askedOn": "2026-11-09",
+      "source": "docs/refinement/sprint-2.md"
+    }
+  ],
+  "history": [
+    {
+      "sprint": "0",
+      "title": "Foundations and the status record",
+      "refined": "2026-11-09",
+      "closed": "2026-11-09",
+      "planned": 4,
+      "done": 4,
+      "returned": 0
+    },
+    {
+      "sprint": "1",
+      "title": "One view I can trust",
+      "refined": "2026-11-09",
+      "closed": "2026-11-09",
+      "planned": 4,
+      "done": 4,
+      "returned": 0
+    }
+  ]
+}

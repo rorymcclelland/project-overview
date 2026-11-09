@@ -11,7 +11,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "node --test \"test/*.test.ts\"",
-    "check:records": "node scripts/check-status.ts",
+    "check:records": "node scripts/check-status.ts test/fixtures docs/status.json",
     "check:secrets": "node scripts/check-secrets.ts"
   },
   "devDependencies": {

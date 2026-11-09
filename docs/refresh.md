@@ -1,6 +1,6 @@
 # Refreshing the overview
 
-How a session (on request, "refresh the overview", or a scheduled run) brings the dashboard up to date. It only reads projects and only writes the dashboard (project rule 3). It never asks Rory to approve anything.
+How a session (on request, "refresh the overview", a scheduled run, or the on-change task `trig_0198hB2JNRJQ4ReGzb8Uu7id` that a project's session fires after writing its record) brings the dashboard up to date. It only reads projects and only writes the dashboard (project rule 3). It never asks Rory to approve anything.
 
 **The dashboard:** "Project overview", slug `6be65e49-fe04-41e2-a215-9a162dd97ffc`. Its two sources, `datasets/projects` and `datasets/waiting`, are JSON files; each refresh replaces both.
 
@@ -35,7 +35,7 @@ Never put a refresh's output in the repository: it holds Job Scout's private det
 
 1. `upload_asset` both files to the dashboard (names `projects.json`, `waiting.json`).
 2. `db_get` `datasets/projects` and `datasets/waiting` for their versions and current file addresses.
-3. One `db_write` with an `update` of each: `source.url` to the new address, `updated` to `{at: <the refresh's time>, by: "Refresh by Claude, from each project's records"}`, `edit` to `{via: "claude", at: <now>}` (the real time, from `date -u +%FT%TZ` just before the write, never a guess), each with its `ifVersion`.
+3. One `db_write` with an `update` of each: `source.url` to the new address, `updated` to `{at: <the refresh's time>, by: "Refresh by Claude, from each project's records"}`, `edit` to `{via: "claude", at: <now>}` (the real time, from `date -u +%FT%TZ` just before the write, never a guess), each with its `ifVersion`. If the write is refused because a dataset changed since it was read (a version conflict, as when two refreshes overlap), read them again and retry once; the newer refresh's files win.
 4. `delete_asset` each old file, once nothing names it.
 
 ## 3. Report

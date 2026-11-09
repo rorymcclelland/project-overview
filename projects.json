@@ -1,7 +1,8 @@
 [
-  { "id": "rfi-respond", "name": "RFI Respond", "kind": "sprint", "sources": [{ "git": "https://github.com/rorymcclelland/RFI-responder" }] },
-  { "id": "studio", "name": "Studio", "kind": "sprint", "sources": [{ "git": "https://github.com/rorymcclelland/studio" }] },
-  { "id": "task-app", "name": "Task app", "kind": "sprint", "sources": [{ "git": "https://github.com/rorymcclelland/task-manager" }] },
-  { "id": "job-scout", "name": "Job Scout", "kind": "sprint", "sources": [{ "folder": "job-scout" }] },
-  { "id": "website", "name": "Website (mcclelland.info)", "kind": "kanban", "sources": [{ "git": "https://github.com/rorymcclelland/website" }] }
+  {"id": "rfi-respond", "name": "RFI Respond", "kind": "sprint", "sources": [{"git": "https://github.com/rorymcclelland/RFI-responder"}]},
+  {"id": "studio", "name": "Studio", "kind": "sprint", "sources": [{"git": "https://github.com/rorymcclelland/studio"}]},
+  {"id": "task-app", "name": "Task app", "kind": "sprint", "sources": [{"git": "https://github.com/rorymcclelland/task-manager"}]},
+  {"id": "job-scout", "name": "Job Scout", "kind": "sprint", "sources": [{"folder": "job-scout"}]},
+  {"id": "website", "name": "Website (mcclelland.info)", "kind": "kanban", "sources": [{"git": "https://github.com/rorymcclelland/website"}]},
+  {"id": "project-overview", "name": "Project Overview", "kind": "sprint", "sources": [{"git": "https://github.com/rorymcclelland/project-overview"}]}
 ]
