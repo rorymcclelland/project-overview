@@ -83,3 +83,16 @@ Order: O2-1 first (small, and every later refresh benefits), then O2-2, then S2-
 - **Q2:** (a). The inbox goes at the top of the dashboard, above the cards.
 - **Q3:** (a). Items waiting more than 7 days are marked.
 - **Q4:** (a). One list, oldest first, with a filter by type.
+
+## Built (9 November 2026)
+
+- **O2-1.** A refresh task just for projects to start, "Project overview refresh (on change)" (`trig_0198hB2JNRJQ4ReGzb8Uu7id`), no schedule of its own, on Rory's PC with both folders, approval automatic, no notifications. The overview now keeps its own status record (`docs/status.json`) and appears on its own dashboard, so update on change could be tried on a real project without touching any other. The three skill changes are re-proposed as one card per skill, combining the Sprint 0 status-record step with starting the refresh.
+- **O2-1 case 1 (by hand).** The overview's record was committed at 17:34 and the refresh started at 17:35; the dashboard showed it at 17:41 (7 minutes). Passed.
+- **O2-1 case 2 (by hand).** Two refreshes started about a minute apart; both finished and the dashboard held one consistent set of tables at 18:35. Passed.
+- **O2-2.** The inbox above the cards, built from `src/inbox.ts`, bundled with the card logic.
+
+## Found while building
+
+- **F-5 Refreshes started from a task did not use Rory's PC while this session was using it.** The 13:30 scheduled run used the PC; the three on-change runs (17:35, about 17:52 twice) all fell back to the cloud and marked Job Scout "not refreshed", although the PC was on. The procedure and all three tasks now load the PC tools before deciding (that alone did not fix it). Likely cause: one session at a time can use the PC. To confirm with the 07:41 run on 10 November. If confirmed, a project session that is using the PC (Job Scout's, most of all) should run the refresh itself rather than start the task: Q1's option (b), for that case only.
+- **F-6 The live dashboard ran the Sprint 0 card script after Sprint 1's review fixes.** The page was updated after Sprint 1's review but its card script was not re-uploaded, so the S7 to S9 card fixes reached the dashboard only on 9 November at 17:50. No real data was affected. A check that the live files match the build is needed (proposed for this sprint's review).
+- **S2-A needs Rory for one minute.** The built-in browser on Rory's PC is not signed in to Claude, so Claude cannot open the spike page. A throwaway page, "Overview spike: saving answers (throwaway)", is ready: Rory opens it, types anything and presses Save, and Claude reads what it saved.
