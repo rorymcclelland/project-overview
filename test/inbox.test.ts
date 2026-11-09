@@ -60,7 +60,9 @@ test('O2-2 case 5: the type filter shows only that type and says how many are hi
   assert.equal(q.hidden, 2);
   const all = filterInbox(box, null);
   assert.equal(all.shown.length, 5); assert.equal(all.hidden, 0);
-  assert.equal(filterInbox(box, 'toString').shown.length, 0);
+  const unknown = filterInbox(box, 'toString');
+  assert.equal(unknown.shown.length, 5, 'a kind no item has falls back to all');
+  assert.equal(unknown.type, null);
 });
 
 test('O2-2 case 7: markup in an item stays as the same characters', () => {

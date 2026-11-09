@@ -42,10 +42,10 @@
   <h1 class="po-title" id="overview">Project overview</h1>
   <p class="po-take" id="takeaway">Waiting on you: <b data-draw="total" data-source="totals" data-field="waiting" data-row="0">—</b> across <b data-draw="projectCount" data-source="totals" data-field="projects" data-row="0">—</b> projects. Last refreshed <span data-draw="refreshed" data-source="totals" data-field="refreshedAt" data-row="0">—</span>.</p>
   <section class="po-inbox" id="inbox" aria-labelledby="inbox-title">
-    <h2 id="inbox-title">Waiting on you, oldest first</h2>
+    <h2 id="inbox-title">Waiting on you: <span data-draw="inboxTotal" data-source="waiting projects">—</span>, oldest first</h2>
     <div class="po-filter" role="group" aria-label="Show one kind" data-draw="inboxFilter" data-source="inboxCounts"></div>
     <ol class="po-inbox-list" data-draw="inbox" data-source="waiting projects"></ol>
-    <p class="po-inbox-note" data-draw="inboxNote"></p>
+    <p class="po-inbox-note" data-draw="inboxNote" data-source="waiting projects"></p>
   </section>
   <div class="po-cards" id="projects" data-draw="cards" data-source="projects waiting"></div>
   <details class="po-foot" id="about">
@@ -59,6 +59,7 @@
       <dt>Waiting on you</dt><dd>Everything the projects' records say is waiting on you, oldest first. A line in the margin marks anything waiting more than 7 days.</dd>
       <dt>Not refreshed</dt><dd>The last refresh could not reach the project (for Job Scout, your PC), so the card shows the refresh before.</dd>
     </dl>
+    <p class="po-muted" id="build">Page build __BUILD__</p>
   </details>
 </div>
 <script src="card.js"></script>
@@ -85,26 +86,43 @@ dash.calc('inboxCounts', {
   title: 'Waiting, by kind',
   description: 'How many things wait on you of each kind, counted from the waiting table, for the projects on this page.',
   fn: (waiting, projects) => {
+    const kinds = ['question', 'demo-signoff', 'deploy-approval', 'hand-check', 'account-step'];
     const ids = new Set(projects.map((p) => p.id));
-    const counts = {};
-    for (const w of waiting) if (ids.has(w.projectId)) counts[w.type] = (counts[w.type] || 0) + 1;
-    return Object.keys(counts).map((type) => ({ type, count: counts[type] }));
+    const counts = new Map();
+    for (const w of waiting) {
+      if (!ids.has(w.projectId)) continue;
+      const type = kinds.includes(w.type) ? w.type : 'other';
+      counts.set(type, (counts.get(type) || 0) + 1);
+    }
+    return [...counts].map(([type, count]) => ({ type, count }));
   },
 });
 
 let inboxType = null;
+let inboxCache = { p: null, w: null, day: '', box: null };
 const inboxData = () => {
   const p = dash.data('projects');
   const w = dash.data('waiting');
   if (p.status !== 'ok' || w.status !== 'ok') return null;
-  return window.OverviewInbox.toInbox(p.data, w.data, new Date());
+  const day = new Date().toDateString();
+  if (inboxCache.p !== p.data || inboxCache.w !== w.data || inboxCache.day !== day)
+    inboxCache = { p: p.data, w: w.data, day, box: window.OverviewInbox.toInbox(p.data, w.data, new Date()) };
+  return inboxCache.box;
+};
+const inboxFiltered = (box) => {
+  const r = window.OverviewInbox.filterInbox(box, inboxType);
+  inboxType = r.type;
+  return r;
 };
 const redrawInbox = () => { dash.draw('inboxFilter'); dash.draw('inbox'); dash.draw('inboxNote'); };
+
+dash.draw('inboxTotal', (el) => { const box = inboxData(); el.textContent = box ? String(box.items.length) : '—'; });
 
 dash.draw('inboxFilter', (el) => {
   const box = inboxData();
   el.replaceChildren();
   if (!box || !box.items.length) return;
+  inboxFiltered(box);
   const choices = [{ type: null, label: 'All', count: box.items.length }].concat(box.types);
   for (const c of choices) {
     const b = make('button');
@@ -112,7 +130,7 @@ dash.draw('inboxFilter', (el) => {
     b.setAttribute('aria-pressed', String(inboxType === c.type));
     b.append(document.createTextNode(c.label + ' '));
     const n = make('span', null, c.count);
-    if (c.type !== null && c.type !== 'other') {
+    if (c.type !== null) {
       n.setAttribute('data-source', 'inboxCounts');
       n.setAttribute('data-field', 'count');
       n.setAttribute('data-where', 'type=' + encodeURIComponent(c.type));
@@ -127,7 +145,7 @@ dash.draw('inbox', (el) => {
   const box = inboxData();
   el.replaceChildren();
   if (!box) return;
-  const { shown } = window.OverviewInbox.filterInbox(box, inboxType);
+  const { shown } = inboxFiltered(box);
   for (const it of shown) {
     const li = make('li', 'po-inbox-item' + (it.overdue ? ' po-overdue' : ''));
     const main = make('div');
@@ -155,9 +173,10 @@ dash.draw('inbox', (el) => {
 dash.draw('inboxNote', (el) => {
   const box = inboxData();
   if (!box) { el.textContent = ''; return; }
-  const { hidden } = window.OverviewInbox.filterInbox(box, inboxType);
+  const { hidden } = inboxFiltered(box);
   const parts = [];
   if (!box.items.length) parts.push('Nothing is waiting on you.');
+  if (box.mismatch) parts.push('The cards count ' + box.cardTotal + ', but ' + box.items.length + ' are listed: a record and its table disagree, so the next refresh should settle it.');
   if (box.overdue) parts.push(box.overdue + ' waiting more than ' + window.OverviewInbox.OVERDUE_DAYS + ' days.');
   if (hidden) parts.push(hidden + ' hidden by the filter.');
   if (box.notShown) parts.push(box.notShown + ' not shown: for a project this page does not list.');

@@ -96,3 +96,23 @@ Order: O2-1 first (small, and every later refresh benefits), then O2-2, then S2-
 - **F-5 Refreshes started from a task did not use Rory's PC while this session was using it.** The 13:30 scheduled run used the PC; the three on-change runs (17:35, about 17:52 twice) all fell back to the cloud and marked Job Scout "not refreshed", although the PC was on. The procedure and all three tasks now load the PC tools before deciding (that alone did not fix it). Likely cause: one session at a time can use the PC. To confirm with the 07:41 run on 10 November. If confirmed, a project session that is using the PC (Job Scout's, most of all) should run the refresh itself rather than start the task: Q1's option (b), for that case only.
 - **F-6 The live dashboard ran the Sprint 0 card script after Sprint 1's review fixes.** The page was updated after Sprint 1's review but its card script was not re-uploaded, so the S7 to S9 card fixes reached the dashboard only on 9 November at 17:50. No real data was affected. A check that the live files match the build is needed (proposed for this sprint's review).
 - **S2-A needs Rory for one minute.** The built-in browser on Rory's PC is not signed in to Claude, so Claude cannot open the spike page. A throwaway page, "Overview spike: saving answers (throwaway)", is ready: Rory opens it, types anything and presses Save, and Claude reads what it saved.
+
+## Independent review (9 November 2026)
+
+An agent that did not build it ran 24 mutations (14 survived) and tried hostile rows. Fixed the same day, each with a test written first (`test/sprint2-review.test.ts`, `test/page-dom.test.ts`, T1 to T11):
+
+| ID | Finding | Severity | Now |
+|---|---|---|---|
+| T1 | Case 8 only half built: if a record and its table disagreed, cards and inbox showed different totals with no warning | Medium | Fixed: the inbox heading shows its total and the note says when the cards and the list disagree |
+| T2 | No test that the page runs the same inbox logic as `src/inbox.ts`; the id tie-break untested | Medium | Fixed: the bundled logic is compared with the source on a rich set, including the 7-day boundary |
+| T3 | The inbox link's click was never tested | Medium | Fixed: clicking each link is tested to reach exactly its card |
+| T4 | Counting by kind used a plain object, so built-in names miscounted | Medium | Fixed: counted safely, unknown kinds as "other", unlisted projects left out |
+| T5 | The note named no source, so it might not redraw | Medium | Fixed |
+| T6 | O2-1 depends on the PC (F-5); case 4 compares the docs, not the skill texts; a new task rather than "the existing" one | Medium | Logged: F-5 stays open; the skill texts are not in this repo, so case 4 stays as written; a dedicated task was chosen so on-change runs never mix with the scheduled ones |
+| T7 | A future date read "today" | Low | Fixed: "a future date", never marked |
+| T8 | A filter whose kind had gone could leave the list empty | Low | Fixed: falls back to all |
+| T9 | An unreadable date sorted as newest | Low | Fixed: such items go last |
+| T10 | 5,000 items stay usable but the inbox was worked out three times per redraw | Low | Fixed: worked out once per data change |
+| T11 | Duplicate ids both show | Low | Left: the checker refuses duplicates in a record |
+
+**F-6 fixed too:** the page now shows its build stamp ("Page build ..." at the foot of "Where this comes from"), a fingerprint of the code it was built from, so anyone can check that the live dashboard runs what was tested.

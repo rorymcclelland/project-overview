@@ -2,9 +2,8 @@
 // a stand-in for the dashboard, so its wiring is checked by behaviour, not by text.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
 import { JSDOM } from 'jsdom';
-import { buildCardScript } from '../scripts/build-page.ts';
+import { buildCardScript, buildPage } from '../scripts/build-page.ts';
 import type { ProjectRow, WaitingRow } from '../src/card.ts';
 
 const row = (o: Partial<ProjectRow>): ProjectRow => ({
@@ -15,7 +14,7 @@ const row = (o: Partial<ProjectRow>): ProjectRow => ({
 });
 
 function render(projects: ProjectRow[], waiting: WaitingRow[]) {
-  const page = readFileSync(new URL('../page/index.html', import.meta.url), 'utf8').replace('<script src="card.js"></script>', '');
+  const page = buildPage().replace('<script src="card.js"></script>', '');
   const dom = new JSDOM(`<!DOCTYPE html><div id="dash-root">${page}</div>`, { runScripts: 'outside-only' });
   const w = dom.window as unknown as Record<string, unknown> & { eval: (s: string) => unknown; document: Document };
   const calcs: Record<string, { inputs: string[]; fn: (...a: unknown[]) => unknown }> = {};
@@ -29,6 +28,7 @@ function render(projects: ProjectRow[], waiting: WaitingRow[]) {
       else for (const [n, f] of draws) if (n === name) w.document.querySelectorAll(`[data-draw="${n}"]`).forEach((el) => f(el));
     },
   };
+  w.__calc = (id: string) => calcs[id].fn(...calcs[id].inputs.map((i) => data[i]));
   w.eval(buildCardScript());
   for (const s of w.document.querySelectorAll('script')) w.eval(s.textContent ?? '');
   for (const [name, fn] of draws) w.document.querySelectorAll(`[data-draw="${name}"]`).forEach((el) => fn(el));
@@ -109,4 +109,59 @@ test('O2-2 case 6: each item links to its project\'s card on the same page', () 
   const links = [...doc.querySelectorAll('.po-inbox-item a.po-inbox-project')];
   assert.deepEqual(links.map((a) => a.getAttribute('href')), ['#project-a', '#project-b', '#project-a']);
   for (const a of links) assert.ok(doc.getElementById(a.getAttribute('href')!.slice(1)), 'the card exists');
+});
+
+
+test('T3: clicking an inbox link scrolls to that project\'s card, never anything else', () => {
+  const doc = render(inboxProjects, inboxWaiting);
+  const scrolled: string[] = [];
+  const proto = (doc.defaultView as unknown as { HTMLElement: { prototype: { scrollIntoView: () => void } } }).HTMLElement.prototype;
+  proto.scrollIntoView = function (this: HTMLElement) { scrolled.push(this.id); };
+  for (const a of doc.querySelectorAll('.po-inbox-item a.po-inbox-project')) (a as HTMLElement).click();
+  assert.deepEqual(scrolled, ['project-a', 'project-b', 'project-a']);
+});
+
+test('T1 and mutants: totals, notes, recommendations, dates and per-kind marks all show on the page', () => {
+  const doc = render([row({ id: 'a', name: 'Alpha', waiting: 5 })], [
+    ...inboxWaiting.filter((x) => x.projectId === 'a'),
+    { projectId: 'a', id: 'O1', type: 'mystery', text: 'odd kind', recommendation: null, askedOn: daysAgo(2), source: null },
+    { projectId: 'zz', id: 'Z', type: 'question', text: 'orphan', recommendation: null, askedOn: daysAgo(1), source: null },
+  ]);
+  const note = doc.querySelector('#inbox .po-inbox-note')!.textContent ?? '';
+  assert.match(note, /1 waiting more than 7 days/);
+  assert.match(note, /1 not shown/);
+  assert.match(note, /cards count 5.*3 are listed/);
+  assert.match(doc.querySelector('#inbox')!.textContent ?? '', /Recommended: Do it\./);
+  assert.match(doc.querySelector('.po-inbox-meta')!.textContent ?? '', /asked \d{4}-\d{2}-\d{2}/);
+  const total = doc.querySelector('#inbox [data-draw="inboxTotal"]')!;
+  assert.equal(total.textContent, '3');
+  const marks = [...doc.querySelectorAll('#inbox .po-filter [data-source="inboxCounts"]')].map((e) => e.getAttribute('data-where'));
+  assert.deepEqual(marks.sort(), ['type=hand-check', 'type=other', 'type=question']);
+  const other = [...doc.querySelectorAll('#inbox .po-filter button')].find((b) => /^Other/.test(b.textContent ?? '')) as HTMLButtonElement;
+  other.click();
+  assert.deepEqual([...doc.querySelectorAll('.po-inbox-text')].map((e) => e.textContent), ['odd kind']);
+});
+
+test('T4: counts by kind ignore unlisted projects and cope with built-in names', () => {
+  const doc = render([row({ id: 'a', name: 'A', waiting: 3 })], [
+    { projectId: 'a', id: '1', type: 'constructor', text: 'x', recommendation: null, askedOn: daysAgo(1), source: null },
+    { projectId: 'a', id: '2', type: '__proto__', text: 'y', recommendation: null, askedOn: daysAgo(1), source: null },
+    { projectId: 'a', id: '3', type: 'question', text: 'z', recommendation: null, askedOn: daysAgo(1), source: null },
+    { projectId: 'zz', id: '4', type: 'question', text: 'w', recommendation: null, askedOn: daysAgo(1), source: null },
+  ]);
+  const counts = (doc.defaultView as unknown as { __calc: (id: string) => { type: string; count: number }[] }).__calc('inboxCounts');
+  const by = Object.fromEntries(counts.map((c) => [c.type, c.count]));
+  assert.equal(by.question, 1);
+  assert.equal(by.other, 2);
+  assert.equal(Object.keys(by).length, 2);
+});
+
+test('T5: the inbox note is redrawn with the data (it names its sources)', () => {
+  const doc = render(inboxProjects, inboxWaiting);
+  assert.equal(doc.querySelector('#inbox [data-draw="inboxNote"]')!.getAttribute('data-source'), 'waiting projects');
+});
+
+test('F-6: the page shows which build it is', () => {
+  const doc = render(inboxProjects, inboxWaiting);
+  assert.match(doc.querySelector('#build')!.textContent ?? '', /^Page build [0-9a-f]{12}$/);
 });
