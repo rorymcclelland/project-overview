@@ -16,3 +16,18 @@ test('O0-1 case 3: likely secrets are found', () => {
 test('O0-1 case 3: ordinary text passes', () => {
   assert.deepEqual(findSecrets('A status record says where a project stands. postgres://localhost/test'), []);
 });
+
+test('R5: more key shapes are found', () => {
+  for (const s of [
+    'sk-' + 'proj-' + 'A1b2'.repeat(12),
+    'AKIA' + 'ABCDEFGHIJKLMNOP',
+    'ASIA' + 'ABCDEFGHIJKLMNOP',
+    'xox' + 'b-123456789012-abcdefABCDEF1234',
+    'AIza' + 'Sy' + 'A'.repeat(33),
+    'sk_' + 'live_' + 'a'.repeat(24),
+    'npm_' + 'a'.repeat(36),
+    'redis' + '://:longpassword1@cache.example.com',
+    'https' + '://admin:longpassword1@example.com',
+    'password' + ' = "hunter2hunter2"',
+  ]) assert.ok(findSecrets(s).length > 0, s);
+});

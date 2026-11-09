@@ -57,10 +57,10 @@ Refined 9 November 2026. Status: Ready, all questions answered 9 November 2026.
 **Before and after.** Today: status is spread across five repos and two Claude docs. After: a checked record for each of RFI Respond, the task app, Job Scout, Studio and the website, written from their current files, each listing what is waiting on Rory today.
 
 **Test cases.**
-1. All five records pass the checker (CI).
+1. All five records pass the checker (by hand: the records are private by design, so they cannot run in this public repo's CI; the run is shown in the demo).
 2. Each record's current sprint and stage match the project's backlog on the day (by hand: a table in the demo comparing record against source, line by line, for Rory to glance at).
 3. Every open "Questions for Rory" item without a recorded answer appears as a waiting item, and none that has been answered does (by hand, same table).
-4. The website record has no sprint fields and still passes (CI).
+4. The website record has no sprint fields and still passes (by hand, as case 1; the same rule is tested in CI on an invented kanban record, O0-2 case 2).
 
 **Out of scope.** Keeping them current (O0-4).
 
@@ -77,7 +77,7 @@ Refined 9 November 2026. Status: Ready, all questions answered 9 November 2026.
 **What changes.** A step added to `sprint-refine` (write the record when a sprint is refined, and again when Rory answers) and to `sprint-close` (write it at close, with the history line). For the website, a line in its agent context: update the record when a change goes live or something waits on Rory. Skill changes are proposed to Rory for review, as the working agreement requires.
 
 **Test cases.**
-1. Following the updated sprint-close steps on an invented project produces a record that passes the checker (CI, using a fixture).
+1. The worked example in the guide, which the updated skills point to, passes the checker (CI). A record made by a project following the new skill steps is first seen at that project's next sprint close.
 2. Rory reviews and saves both skill changes (by hand: Rory, from the review card).
 
 **Out of scope.** Gathering records into the page (Sprint 1).
@@ -108,3 +108,23 @@ Order: O0-1, then O0-2, then O0-3 and O0-4 in either order. Total about two and 
 ## Found during refinement
 
 - **F-1 Job Scout has about three weeks of work not committed to git.** 162 changed files since the 0.9.0 commit of 17 October, so none of Sprints 6 to 11 is in GitHub history. Raised with Rory; fixing it is Job Scout's work, not this project's.
+
+## Independent review (9 November 2026)
+
+An agent that did not build the work reviewed the tests against the agreed cases (with mutation testing on a copy), tried hostile records, and checked each record against its sources. Every finding was fixed the same day, each with a test written first (`test/review-fixes.test.ts`, R1 to R11):
+
+| ID | Finding | Severity | Now |
+|---|---|---|---|
+| R1 | Deeply nested JSON crashed the checker and stopped a batch | High | Fixed: refused above 12 levels; text walked without recursion, only on sound records |
+| R2 | Links passed on form alone: a user name before the host, control and direction characters, look-alike international addresses, quotes | Medium | Fixed: plain https links only; encoded international addresses refused |
+| R3 | Refusal messages repeated hostile input in full | Medium | Fixed: values shown at most 40 characters, letters and digits only |
+| R4 | Invisible-only text counted as filled; control, direction and broken characters passed | Medium | Fixed: refused |
+| R5 | The secrets check missed common key shapes; `.env` not ignored | Medium | Fixed: ten more shapes; `.env` ignored |
+| R6 | Weak tests: markup variants, later dates, the clock allowance, time zones, kanban history, totals, `__proto__` | Medium | Fixed: each covered; the allowance cut to five minutes |
+| R7 | O0-3 cases 1 and 4 said CI but can only run by hand; O0-4 case 1 checks the guide's example | Medium | Wording corrected above |
+| R8 | Records left out items waiting on Rory (RFI Respond's branch deletions and Bolt project; Job Scout's older list) | Medium | Fixed: added; Job Scout's older items as one item to confirm |
+| R9 | Records carried a made-up time a few minutes ahead | Low | Fixed: the real time |
+| R10 | Dates compared in UTC, so a record written after midnight in summer time was refused | Low | Fixed: the record's own calendar day |
+| R11 | Duplicate ids, closed before refined, unlimited notes, hour 24 and a Windows byte-order mark | Low | Fixed |
+| R12 | RFI Respond's sprint branch moved on after its record was written | Low | Expected: records are snapshots; Sprint 1's refresh must show their age (F-2) |
+| R13 | Studio's record said "second-last of 11"; its backlog now plans 12 | Medium | Fixed |

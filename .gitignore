@@ -1,3 +1,6 @@
 node_modules/
 # Real status records live only on Rory's PC and in the page's private store (project rule 5)
 private/
+.env
+.env.*
+!.env.example
