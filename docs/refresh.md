@@ -6,7 +6,9 @@ How a session (on request, "refresh the overview", a scheduled run, or the on-ch
 
 ## 1. Run the refresh
 
-**If Rory's PC is connected** (the `device_bash` tool answers), run it there, where Job Scout's folder and the first records are:
+**First, look for Rory's PC properly.** Its tools may not be loaded at the start of a run: load `mcp__remote-devices__device_bash` with ToolSearch (`select:mcp__remote-devices__device_bash`) and call it once (`ls "$HOME/mnt/"`). Only if that call fails is the PC out of reach. (On 9 November an on-change run skipped this, used the cloud fallback, and marked Job Scout not refreshed while the PC was on.)
+
+**If Rory's PC is connected** (the `device_bash` call answers), run it there, where Job Scout's folder and the first records are:
 
 ```bash
 [ -d /tmp/po-sync ] || git clone -q --depth 1 https://github.com/rorymcclelland/project-overview /tmp/po-sync

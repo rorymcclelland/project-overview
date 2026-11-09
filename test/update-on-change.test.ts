@@ -25,3 +25,7 @@ test('O2-1: the overview keeps its own status record, and it passes the checker'
   const projects = JSON.parse(read('projects.json')) as { id: string }[];
   assert.ok(projects.some((p) => p.id === 'project-overview'));
 });
+
+test('O2-1: the procedure loads the PC tools before deciding the PC is out of reach', () => {
+  assert.match(read('docs/refresh.md'), /select:mcp__remote-devices__device_bash/);
+});
