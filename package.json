@@ -10,7 +10,7 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "test": "node --test test/",
+    "test": "node --test \"test/*.test.ts\"",
     "check:records": "node scripts/check-status.ts",
     "check:secrets": "node scripts/check-secrets.ts"
   },

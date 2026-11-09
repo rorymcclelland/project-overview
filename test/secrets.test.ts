@@ -8,8 +8,8 @@ test('O0-1 case 3: likely secrets are found', () => {
     'sk-ant-api03-' + 'a'.repeat(40),
     'ghp_' + 'b'.repeat(36),
     'eyJhbGciOiJIUzI1NiJ9.' + 'c'.repeat(30) + '.' + 'd'.repeat(30),
-    'postgres://user:hunter2hunter2@db.example.com:5432/db',
-    '-----BEGIN PRIVATE KEY-----',
+    'postgres' + '://user:' + 'hunter2hunter2' + '@db.example.com:5432/db',
+    '-----BEGIN ' + 'PRIVATE KEY-----',
   ]) assert.ok(findSecrets(s).length > 0, s);
 });
 

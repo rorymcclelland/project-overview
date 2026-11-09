@@ -1,0 +1,104 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/rorymcclelland/project-overview/schema/status.v1.json",
+  "title": "Project status record, version 1",
+  "description": "Where one build project stands. Explained field by field in docs/status-record.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "project", "writtenAt", "writtenBy", "lastActivity", "links", "waiting"],
+  "properties": {
+    "version": { "const": 1 },
+    "project": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "kind"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,39}$" },
+        "name": { "$ref": "#/definitions/shortText" },
+        "kind": { "enum": ["sprint", "kanban"] }
+      }
+    },
+    "writtenAt": { "type": "string", "format": "date-time" },
+    "writtenBy": { "$ref": "#/definitions/shortText" },
+    "lastActivity": { "$ref": "#/definitions/date" },
+    "links": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "repo": { "$ref": "#/definitions/httpsUrl" },
+        "demo": { "$ref": "#/definitions/httpsUrl" },
+        "live": { "$ref": "#/definitions/httpsUrl" },
+        "backlog": { "$ref": "#/definitions/httpsUrl" }
+      }
+    },
+    "sprint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["number", "title", "stage", "stageSince", "stories"],
+      "properties": {
+        "number": { "type": "string", "pattern": "^[A-Za-z0-9-]{1,10}$" },
+        "title": { "$ref": "#/definitions/shortText" },
+        "stage": { "enum": ["refining", "awaiting-answers", "ready", "building", "awaiting-signoff", "closed"] },
+        "stageSince": { "$ref": "#/definitions/date" },
+        "stories": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "title", "status"],
+            "properties": {
+              "id": { "type": "string", "pattern": "^[A-Za-z0-9.-]{1,20}$" },
+              "title": { "$ref": "#/definitions/shortText" },
+              "size": { "enum": ["S", "M", "L"] },
+              "status": { "$ref": "#/definitions/shortText" }
+            }
+          }
+        }
+      }
+    },
+    "waiting": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "type", "text", "askedOn"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[A-Za-z0-9.-]{1,20}$" },
+          "type": { "enum": ["question", "demo-signoff", "deploy-approval", "account-step"] },
+          "text": { "$ref": "#/definitions/longText" },
+          "recommendation": { "$ref": "#/definitions/longText" },
+          "askedOn": { "$ref": "#/definitions/date" },
+          "source": { "$ref": "#/definitions/shortText" }
+        }
+      }
+    },
+    "history": {
+      "type": "array",
+      "maxItems": 200,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["sprint", "planned", "done", "returned"],
+        "properties": {
+          "sprint": { "type": "string", "pattern": "^[A-Za-z0-9-]{1,10}$" },
+          "title": { "$ref": "#/definitions/shortText" },
+          "refined": { "$ref": "#/definitions/date" },
+          "closed": { "$ref": "#/definitions/date" },
+          "planned": { "$ref": "#/definitions/count" },
+          "done": { "$ref": "#/definitions/count" },
+          "returned": { "$ref": "#/definitions/count" }
+        }
+      }
+    },
+    "notes": { "type": "string" }
+  },
+  "definitions": {
+    "date": { "type": "string", "format": "date" },
+    "httpsUrl": { "type": "string", "maxLength": 500, "pattern": "^https://[^\\s]+$" },
+    "shortText": { "type": "string", "minLength": 1, "maxLength": 300, "pattern": "\\S" },
+    "longText": { "type": "string", "minLength": 1, "maxLength": 4000, "pattern": "\\S" },
+    "count": { "type": "integer", "minimum": 0, "maximum": 1000 }
+  }
+}
