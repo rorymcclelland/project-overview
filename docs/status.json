@@ -5,47 +5,48 @@
     "name": "Project Overview",
     "kind": "sprint"
   },
-  "writtenAt": "2026-11-09T17:34:22Z",
-  "writtenBy": "Project Overview session, Sprint 2 build",
+  "writtenAt": "2026-11-09T20:01:00Z",
+  "writtenBy": "Project Overview session, Sprint 2 demo",
   "lastActivity": "2026-11-09",
   "links": {
     "repo": "https://github.com/rorymcclelland/project-overview",
-    "backlog": "https://github.com/rorymcclelland/project-overview/blob/main/docs/BACKLOG.md"
+    "backlog": "https://github.com/rorymcclelland/project-overview/blob/main/docs/BACKLOG.md",
+    "demo": "https://github.com/rorymcclelland/project-overview/blob/main/docs/testing/sprint-2-demo.md"
   },
   "sprint": {
     "number": "2",
     "title": "What is waiting on me",
-    "stage": "building",
+    "stage": "awaiting-signoff",
     "stageSince": "2026-11-09",
     "stories": [
       {
         "id": "O2-1",
         "title": "Update on change",
         "size": "S",
-        "status": "Ready, Sprint 2"
+        "status": "Built, awaiting sign-off"
       },
       {
         "id": "O2-2",
         "title": "The inbox",
         "size": "M",
-        "status": "Ready, Sprint 2"
+        "status": "Built, awaiting sign-off"
       },
       {
         "id": "S2-A",
         "title": "Spike: saving answers in the page",
         "size": "S",
-        "status": "Ready, Sprint 2 (spike)"
+        "status": "Done, Sprint 2 (decision 0003)"
       }
     ]
   },
   "waiting": [
     {
-      "id": "SK",
-      "type": "account-step",
-      "text": "Save the three skill changes (sprint-refine, sprint-close, build-working-agreement) from their review cards, so each project keeps its own status record and updates the dashboard.",
-      "recommendation": "Save all three.",
+      "id": "D2",
+      "type": "demo-signoff",
+      "text": "Sprint 2 demo is ready for sign-off: the inbox, update on change, and the spike's decision on saving answers.",
+      "recommendation": "Sign off. F-5 stays open until the 07:41 run on 10 November confirms it.",
       "askedOn": "2026-11-09",
-      "source": "docs/refinement/sprint-2.md"
+      "source": "docs/testing/sprint-2-demo.md"
     }
   ],
   "history": [

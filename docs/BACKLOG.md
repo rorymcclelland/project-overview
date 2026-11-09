@@ -72,9 +72,9 @@ Refinement: `docs/refinement/sprint-2.md`
 
 | ID | Story | Acceptance criteria (summary) | Size | Status |
 |---|---|---|---|---|
-| O2-1 | Update on change | Whenever a project's session writes its status record (sprint-refine, sprint-close, the website's routine), it refreshes the dashboard straight away; the two daily runs stay as a safety net. Covers all five projects, Job Scout included | S | Ready, Sprint 2 |
-| O2-2 | The inbox | One list of everything waiting on Rory across projects, oldest first, by type, each linked to its project's card | M | Ready, Sprint 2 |
-| S2-A | Spike: saving answers in the page | Try, on a copy, whether the dashboard can save what Rory types when he presses a control, and how a project's session reads it back. Answers Sprint 3's design | S | Ready, Sprint 2 (spike) |
+| O2-1 | Update on change | Whenever a project's session writes its status record (sprint-refine, sprint-close, the website's routine), it refreshes the dashboard straight away; the two daily runs stay as a safety net. Covers all five projects, Job Scout included | S | Built, awaiting sign-off |
+| O2-2 | The inbox | One list of everything waiting on Rory across projects, oldest first, by type, each linked to its project's card | M | Built, awaiting sign-off |
+| S2-A | Spike: saving answers in the page | Try, on a copy, whether the dashboard can save what Rory types when he presses a control, and how a project's session reads it back. Answers Sprint 3's design | S | Done, Sprint 2 (decision 0003) |
 
 ## Candidates after Sprint 2
 
