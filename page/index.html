@@ -1,0 +1,140 @@
+<meta name="dash-one-writer">
+<style>
+.po { font-family: var(--font-anthropic-sans); color: var(--color-fg); }
+.po-title { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); margin: 0 0 var(--cds-gap-xs); }
+.po-take { margin: 0 0 var(--cds-gap-lg); font-size: var(--cds-font-size-body); }
+.po-take b { font-variant-numeric: tabular-nums; }
+.po-muted { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+.po-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr)); gap: var(--cds-gap-md); min-height: 120px; }
+.po-card { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-lg); display: flex; flex-direction: column; gap: var(--cds-gap-sm); min-width: 0; overflow-wrap: anywhere; }
+.po-card h2 { font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); margin: 0; }
+.po-row { display: flex; justify-content: space-between; align-items: baseline; gap: var(--cds-gap-sm); }
+.po-count { font-family: var(--font-anthropic-serif); font-size: var(--cds-font-size-title); font-variant-numeric: tabular-nums; line-height: 1; }
+.po-count.po-zero { color: var(--color-fg-muted); }
+.po-stage { margin: 0; }
+.po-stage strong { font-weight: var(--cds-font-weight-medium); }
+.po-flag { margin: 0; padding: var(--cds-pad-sm) var(--cds-pad-md); border-left: 3px solid var(--color-warn); background: color-mix(in srgb, var(--color-warn) 10%, transparent); font-size: var(--cds-font-size-caption); }
+.po-flag.po-no-record { border-left-color: var(--color-bad); background: color-mix(in srgb, var(--color-bad) 10%, transparent); }
+.po-items { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: var(--cds-gap-sm); }
+.po-items li { border-top: 1px solid var(--color-border-line); padding-top: var(--cds-gap-sm); }
+.po-type { display: inline-block; font-size: var(--cds-font-size-caption); font-weight: var(--cds-font-weight-medium); border: 1px solid var(--color-border-line); border-radius: 999px; padding: 0 var(--cds-pad-sm); margin-right: var(--cds-gap-xs); }
+.po-rec { font-size: var(--cds-font-size-caption); margin-top: 2px; }
+.po-links { display: flex; flex-wrap: wrap; gap: var(--cds-gap-sm); font-size: var(--cds-font-size-caption); }
+.po-note { margin: 0; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+.po-foot { margin-top: var(--cds-gap-xl); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+.po-foot dt { font-weight: var(--cds-font-weight-medium); color: var(--color-fg); margin-top: var(--cds-gap-sm); }
+.po-foot dd { margin: 0; }
+[data-dash-source-state=refreshing] { opacity: .5; }
+</style>
+<div class="po">
+  <h1 class="po-title" id="overview">Project overview</h1>
+  <p class="po-take" id="takeaway">Waiting on you: <b data-draw="total" data-source="totals" data-field="waiting" data-row="0">—</b> across <b data-draw="projectCount" data-source="totals" data-field="projects" data-row="0">—</b> projects. Last refreshed <span data-draw="refreshed" data-source="totals" data-field="refreshedAt" data-row="0">—</span>.</p>
+  <div class="po-cards" id="projects" data-draw="cards" data-source="projects waiting"></div>
+  <details class="po-foot" id="about">
+    <summary>Where this comes from, and what the warnings mean</summary>
+    <p>Each project keeps a status record, written by its own sprint sessions. A refresh, on request and at about 07:40 and 13:20 on weekdays, finds each project's newest record that passes the checker and puts it here. Nothing here changes a project.</p>
+    <dl>
+      <dt>Record from</dt><dd>When the project wrote what this card shows. A card is only as current as its record.</dd>
+      <dt>Moved on since this record</dt><dd>The project has changes more than an hour newer than its record, so the card may be out of date.</dd>
+      <dt>No current record</dt><dd>No record passed the checker. The reason is given; the last valid record is shown if there is one.</dd>
+      <dt>A newer record was refused</dt><dd>The project wrote a newer record that failed the checker, so an older one is shown.</dd>
+      <dt>Not refreshed</dt><dd>The last refresh could not reach the project (for Job Scout, your PC), so the card shows the refresh before.</dd>
+    </dl>
+  </details>
+</div>
+<script src="card.js"></script>
+<script>
+dash.calc('totals', {
+  inputs: ['projects'],
+  title: 'Totals',
+  description: 'Things waiting on you and the number of projects, added up from the projects table, with its latest refresh.',
+  fn: (projects) => [{
+    waiting: projects.reduce((n, p) => n + Number(p.waiting || 0), 0),
+    projects: projects.length,
+    refreshedAt: projects.reduce((m, p) => (p.refreshedAt > m ? p.refreshedAt : m), ''),
+  }],
+});
+
+const ukTime = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+const totalsRow = () => { const t = dash.data('totals'); return t.status === 'ok' && t.data && t.data[0] ? t.data[0] : null; };
+dash.draw('total', (el) => { const t = totalsRow(); el.textContent = t ? String(t.waiting) : '—'; });
+dash.draw('projectCount', (el) => { const t = totalsRow(); el.textContent = t ? String(t.projects) : '—'; });
+dash.draw('refreshed', (el) => { const t = totalsRow(); el.textContent = t && t.refreshedAt ? ukTime.format(new Date(t.refreshedAt)) : '—'; });
+
+function make(tag, cls, text) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text !== undefined && text !== null) e.textContent = String(text);
+  return e;
+}
+function mark(e, field, id) {
+  e.setAttribute('data-source', 'projects');
+  e.setAttribute('data-field', field);
+  e.setAttribute('data-where', 'id=' + encodeURIComponent(id));
+  return e;
+}
+
+dash.draw('cards', (el) => {
+  const p = dash.data('projects');
+  const w = dash.data('waiting');
+  if (p.status !== 'ok' || w.status !== 'ok') {
+    el.replaceChildren();
+    if (p.status === 'error' || w.status === 'error') el.append(make('p', 'po-muted', 'Failed to load.'));
+    else el.classList.add('dash-skeleton');
+    return;
+  }
+  el.classList.remove('dash-skeleton');
+  const { toCard, orderCards } = window.OverviewCard;
+  const now = new Date();
+  const cards = orderCards(p.data.map((row) => toCard(row, w.data, now)));
+  el.replaceChildren(...cards.map((c) => {
+    const card = make('section', 'po-card');
+    card.id = 'project-' + c.id;
+    const head = make('div', 'po-row');
+    head.append(make('h2', null, c.name));
+    const count = mark(make('span', 'po-count' + (c.waitingCount ? '' : ' po-zero'), c.waitingCount), 'waiting', c.id);
+    count.setAttribute('aria-label', c.waitingCount + ' waiting on you');
+    head.append(count);
+    card.append(head);
+    if (c.sprintLine) card.append(mark(make('p', 'po-stage', c.sprintLine), 'sprint', c.id));
+    if (c.stageText) {
+      const s = make('p', 'po-stage');
+      s.append(mark(make('strong', null, c.stageText), 'stage', c.id));
+      if (c.stageSince) s.append(document.createTextNode(' ' + c.stageSince));
+      if (c.storiesText) s.append(document.createTextNode(' · '), mark(make('span', null, c.storiesText), 'stories', c.id));
+      card.append(s);
+    } else if (c.kind === 'kanban') card.append(make('p', 'po-stage', 'Kanban: changes go live one by one.'));
+    for (const f of c.flags) card.append(make('p', 'po-flag' + (f.kind === 'no-record' ? ' po-no-record' : ''), f.text));
+    card.append(make('p', 'po-muted', c.waitingSummary));
+    if (c.items.length) {
+      const ul = make('ul', 'po-items');
+      for (const it of c.items) {
+        const li = make('li');
+        li.append(make('span', 'po-type', it.typeLabel), document.createTextNode(it.text));
+        if (it.recommendation) li.append(make('div', 'po-rec', 'Recommended: ' + it.recommendation));
+        li.append(make('div', 'po-muted', it.askedText + (it.source ? ' · ' + it.source : '')));
+        ul.append(li);
+      }
+      card.append(ul);
+    }
+    const meta = make('p', 'po-muted');
+    meta.append(document.createTextNode([c.lastActivityText, c.ageText].filter(Boolean).join(' · ')));
+    card.append(meta);
+    if (c.notes) card.append(make('p', 'po-note', c.notes));
+    if (c.links.length) {
+      const links = make('div', 'po-links');
+      for (const l of c.links) {
+        if (l.href) {
+          const a = make('a', null, l.text);
+          a.href = l.href;
+          a.target = '_blank';
+          a.rel = 'noopener noreferrer';
+          links.append(a);
+        } else links.append(make('span', 'po-muted', l.label + ': ' + l.text));
+      }
+      card.append(links);
+    }
+    return card;
+  }));
+});
+</script>
