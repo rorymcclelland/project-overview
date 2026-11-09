@@ -16,16 +16,16 @@ Way of working: the `build-working-agreement` skill. Rory is product manager; Cl
 
 Projects: RFI Respond, the task app, Job Scout, Studio (all on sprints) and the website (kanban, lighter card). Spend: AI API usage, hosting plans, and Claude build time as the plan fee split by share of sessions; monthly forecast, budget per project with warnings, cost per sprint. Separate from the task app. Delivered as a Claude artifact with its own data store. Sprints close with a demo page. Hosting split rule settled at Sprint 5 refinement; budgets asked at Sprint 6 refinement.
 
-## Sprint 0: foundations and the status record (refined 9 November 2026)
+## Sprint 0: foundations and the status record (refined 9 November 2026; built 9 November 2026, awaiting Rory's sign-off)
 
-Refinement: `docs/refinement/sprint-0.md`
+Refinement: `docs/refinement/sprint-0.md`. Demo: `docs/testing/sprint-0-demo.md`. O0-4's skill changes wait on Rory saving them.
 
 | ID | Story | Acceptance criteria (summary) | Size | Status |
 |---|---|---|---|---|
-| O0-1 | Repository and working setup | GitHub repo, README, agent context, decision log, CI running checks on every push | S | Ready, Sprint 0 |
-| O0-2 | The status record | One written, versioned format every project uses for its status; a checker that accepts good records and explains bad ones | M | Ready, Sprint 0 |
-| O0-3 | First records for all five projects | A checked status record for each project, written from its current backlog and refinement files | M | Ready, Sprint 0 |
-| O0-4 | Projects keep their records up to date | sprint-refine and sprint-close write the record; the website gets a lighter equivalent; proposed to Rory as skill changes | S | Ready, Sprint 0 |
+| O0-1 | Repository and working setup | GitHub repo, README, agent context, decision log, CI running checks on every push | S | Built, Sprint 0: awaiting sign-off |
+| O0-2 | The status record | One written, versioned format every project uses for its status; a checker that accepts good records and explains bad ones | M | Built, Sprint 0: awaiting sign-off |
+| O0-3 | First records for all five projects | A checked status record for each project, written from its current backlog and refinement files | M | Built, Sprint 0: awaiting sign-off |
+| O0-4 | Projects keep their records up to date | sprint-refine and sprint-close write the record; the website gets a lighter equivalent; proposed to Rory as skill changes | S | Built, Sprint 0: awaiting sign-off |
 
 ## Found during refinement
 
