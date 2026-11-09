@@ -3,11 +3,11 @@
 // node scripts/preview-page.ts --projects <projects.json> --waiting <waiting.json> --out <file.html>
 import { readFileSync, writeFileSync } from 'node:fs';
 import { parseArgs } from 'node:util';
-import { buildCardScript } from './build-page.ts';
+import { buildCardScript, buildPage } from './build-page.ts';
 
 const { values: a } = parseArgs({ options: { projects: { type: 'string' }, waiting: { type: 'string' }, out: { type: 'string' } } });
 if (!a.projects || !a.waiting || !a.out) throw new Error('missing argument');
-const page = readFileSync(new URL('../page/index.html', import.meta.url), 'utf8');
+const page = buildPage();
 const data = { projects: JSON.parse(readFileSync(a.projects, 'utf8')), waiting: JSON.parse(readFileSync(a.waiting, 'utf8')) };
 const stub = `<script>
 const DATA = ${JSON.stringify(data).replace(/</g, '\\u003c')};
