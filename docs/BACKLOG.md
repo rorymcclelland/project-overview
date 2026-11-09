@@ -66,15 +66,15 @@ Refinement: `docs/refinement/sprint-1.md`. Demo: `docs/testing/sprint-1-demo.md`
 
 **Proposed for Sprint 2** (re-ranked at the close): O2-1 update on change (quick win, first), O2-2 the inbox, and the spike S2-A on saving answers in the page, which Sprint 3 is refined against. Rory confirms at the start of Sprint 2.
 
-## Sprint 2: what is waiting on me (refining)
+## Sprint 2: what is waiting on me (refined 9 November 2026)
 
 Refinement: `docs/refinement/sprint-2.md`
 
 | ID | Story | Acceptance criteria (summary) | Size | Status |
 |---|---|---|---|---|
-| O2-1 | Update on change | Whenever a project's session writes its status record (sprint-refine, sprint-close, the website's routine), it refreshes the dashboard straight away; the two daily runs stay as a safety net. Covers all five projects, Job Scout included | S | Refining |
-| O2-2 | The inbox | One list of everything waiting on Rory across projects, oldest first, by type, each linked to its project's card | M | Refining |
-| S2-A | Spike: saving answers in the page | Try, on a copy, whether the dashboard can save what Rory types when he presses a control, and how a project's session reads it back. Answers Sprint 3's design | S | Refining (spike) |
+| O2-1 | Update on change | Whenever a project's session writes its status record (sprint-refine, sprint-close, the website's routine), it refreshes the dashboard straight away; the two daily runs stay as a safety net. Covers all five projects, Job Scout included | S | Ready, Sprint 2 |
+| O2-2 | The inbox | One list of everything waiting on Rory across projects, oldest first, by type, each linked to its project's card | M | Ready, Sprint 2 |
+| S2-A | Spike: saving answers in the page | Try, on a copy, whether the dashboard can save what Rory types when he presses a control, and how a project's session reads it back. Answers Sprint 3's design | S | Ready, Sprint 2 (spike) |
 
 ## Candidates after Sprint 2
 

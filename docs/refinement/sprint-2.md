@@ -1,6 +1,6 @@
 # Sprint 2 refinement: what is waiting on me
 
-Refined 9 November 2026. Status: awaiting Rory's answers.
+Refined 9 November 2026. Status: Ready, all questions answered 9 November 2026. O2-1 depends on Rory saving the skill changes.
 
 ## What we know
 
@@ -76,3 +76,10 @@ Order: O2-1 first (small, and every later refresh benefits), then O2-2, then S2-
 - **Q2 Where the inbox goes.** (a) At the top of the dashboard, above the cards (recommended: the first thing you see is what needs you); (b) in its own tab, beside the cards.
 - **Q3 When an item counts as waiting too long.** (a) More than 7 days (recommended: 5 of today's 14 items would be marked, all from October, so the oldest stand out without marking everything); (b) more than 3 days (8 of 14 marked); (c) never mark.
 - **Q4 How the inbox is arranged.** (a) One list, oldest first, with a filter by type (recommended); (b) grouped by type, each group oldest first.
+
+## Rory's answers (9 November 2026)
+
+- **Q1:** (a). The project's session fires the existing scheduled refresh task.
+- **Q2:** (a). The inbox goes at the top of the dashboard, above the cards.
+- **Q3:** (a). Items waiting more than 7 days are marked.
+- **Q4:** (a). One list, oldest first, with a filter by type.
