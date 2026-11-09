@@ -32,6 +32,9 @@ Refinement: `docs/refinement/sprint-0.md`
 | ID | Item | Now |
 |---|---|---|
 | F-1 | Job Scout's work since 17 October is not committed to git (162 changed files) | Raised with Rory; Job Scout's own work |
+| F-2 | Current status sits on sprint branches, not `main`: RFI Respond's on `sprint-26`, Studio's on `sprint-9-close`. A refresh that reads `main` would show stale states | Found writing the first records (O0-3); Sprint 1, for the refresh's refinement |
+| F-3 | Some current sources are not on GitHub at all: Job Scout's private folder, and possibly the task app's local copy (`C:\Data\code\task-manager`, not read) | Found in O0-3; Sprint 1, for the refresh's refinement |
+| F-4 | Waiting items include test packs only Rory can run; added a `hand-check` type to the format | Done, Sprint 0 (O0-3) |
 
 ## Later sprints (one line each; refined just in time)
 
