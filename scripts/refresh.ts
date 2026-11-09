@@ -104,7 +104,7 @@ function gatherGit(url: string, cache: string): Gathered {
     const ref = `refs/heads/${b}`;
     try {
       const at = gitRun(['-C', dir, 'log', '-1', '--format=%cI', ref, '--']).trim();
-      if (at) activity.push({ at: new Date(at).toISOString().replace('.000Z', 'Z'), where: `branch ${b}` });
+      if (at) activity.push({ at: new Date(at).toISOString().replace(/\.\d{3}Z$/, 'Z'), where: `branch ${b}` });
     } catch {
       /* a branch with no readable commit adds no activity */
     }
@@ -127,7 +127,7 @@ function newestFile(root: string): Activity | null {
       const s = statSync(p);
       if (s.isDirectory()) walk(p, depth + 1);
       else if (s.isFile() && (!best || s.mtime.toISOString() > best.at))
-        best = { at: s.mtime.toISOString().replace('.000Z', 'Z'), where: relative(join(root, '..'), p).split('\\').join('/') };
+        best = { at: s.mtime.toISOString().replace(/\.\d{3}Z$/, 'Z'), where: relative(join(root, '..'), p).split('\\').join('/') };
     }
   };
   walk(root, 0);
