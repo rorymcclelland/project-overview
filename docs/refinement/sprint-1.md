@@ -1,6 +1,6 @@
 # Sprint 1 refinement: one view I can trust
 
-Refined 9 November 2026. Status: awaiting Rory's answers.
+Refined 9 November 2026. Status: Ready, all questions answered 9 November 2026.
 
 ## What we know
 
@@ -84,7 +84,7 @@ Refined 9 November 2026. Status: awaiting Rory's answers.
 
 **The job.** The page is current when Rory opens it, without his asking.
 
-**What changes.** A scheduled task (Q2) that runs the refresh procedure, allowed to use Rory's PC for Job Scout and the first records. If the PC cannot be reached, the GitHub projects still refresh and Job Scout's card says "Not refreshed" (O1-3).
+**What changes.** A scheduled task that runs, on weekdays at about 07:40 and 13:20 UK time (Q2; 13:20 rather than mid-afternoon because runs between 14:00 and 17:00 UK time can be delayed), the refresh procedure, allowed to use Rory's PC for Job Scout and the first records. If the PC cannot be reached, the GitHub projects still refresh and Job Scout's card says "Not refreshed" (O1-3).
 
 **Test cases.**
 1. The task exists with the agreed schedule and its approval setting is reported (by hand: the task list).
@@ -107,3 +107,10 @@ Order: O1-1 and `src/card.ts` first (tests first), then O1-2's page, then O1-3, 
 - **Q2 When the refresh runs.** (a) On request ("refresh the overview" in this Project) and on a schedule every weekday at about 07:40, using your PC for Job Scout (recommended: the page is current when you start the day; if the PC is off, the others still refresh); (b) on request only; (c) on request and twice a day.
 - **Q3 "Moved on".** (a) Flag a project whose repo or folder has changes more than an hour newer than its record (recommended: it says exactly what it means); (b) flag any record more than three days old, whatever happened.
 - **Q4 Card order.** (a) Most things waiting on you first, then most recent activity (recommended: what needs you is at the top); (b) a fixed order you choose.
+
+## Rory's answers (9 November 2026)
+
+- **Q1:** (a). Claude's Dashboard type.
+- **Q2:** (c). On request, and on a schedule twice each weekday: about 07:40 and 13:20 UK time.
+- **Q3:** (a). "Moved on" when the project's repo or folder has changes more than an hour newer than its record.
+- **Q4:** (a). Most things waiting on Rory first, then most recent activity.
