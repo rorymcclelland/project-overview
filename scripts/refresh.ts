@@ -4,7 +4,10 @@
 // It only reads projects (rule 3). Git is run with argument lists, never a shell.
 //
 // node scripts/refresh.ts --projects projects.json --out <dir> [--previous <summary.json>]
+//   [--previous-projects <projects.json> --previous-waiting <waiting.json>]
 //   [--first private/records] [--folder job-scout=<path>] [--cache <dir>]
+// The previous refresh is either its summary.json (on Rory's PC) or the two tables
+// the dashboard holds (when his PC is not connected; docs/refresh.md).
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
@@ -254,6 +257,12 @@ export function refresh(o: Options): Summary {
       }
       const changed = !prevRow ? 'new' : prevRow.writtenAt === row.writtenAt && prevRow.source === row.source ? 'unchanged' : 'changed';
       report.push(`${cfg.name}: ${row.source}, record of ${row.writtenAt} (${changed})${reachable ? '' : '; part of its source could not be reached'}.`);
+    } else if (!o.firstRecords && prevRow?.source === 'first record' && !newerRefusal) {
+      // The first records are on Rory's PC; when it is not connected, a first record
+      // (which never changes) carries over from the last refresh as it was.
+      row = { ...prevRow, refreshedOk: reachable, refreshedAt: now, lastRefreshedOk: reachable ? now : prevRow.lastRefreshedOk };
+      rows = prevWaiting;
+      report.push(`${cfg.name}: first record, record of ${row.writtenAt} (unchanged; carried over).`);
     } else if (prevRow && prevRow.writtenAt) {
       row = { ...prevRow, noRecord: true, refused: newerRefusal?.msg ?? null, refreshedAt: now, refreshedOk: reachable };
       if (reachable) row.lastRefreshedOk = now;
@@ -283,11 +292,21 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     options: {
       projects: { type: 'string' }, out: { type: 'string' }, previous: { type: 'string' }, first: { type: 'string' },
       folder: { type: 'string', multiple: true }, cache: { type: 'string' },
+      'previous-projects': { type: 'string' }, 'previous-waiting': { type: 'string' },
     },
   });
   if (!a.projects || !a.out) throw new Error('--projects and --out are required');
   const folders = Object.fromEntries((a.folder ?? []).map((f) => f.split(/=(.*)/s).slice(0, 2)));
-  const previous = a.previous && existsSync(a.previous) ? (JSON.parse(readFileSync(a.previous, 'utf8')) as Summary) : undefined;
+  let previous = a.previous && existsSync(a.previous) ? (JSON.parse(readFileSync(a.previous, 'utf8')) as Summary) : undefined;
+  if (!previous && a['previous-projects'] && a['previous-waiting']) {
+    const rows = JSON.parse(readFileSync(a['previous-projects'], 'utf8')) as ProjectRow[];
+    previous = {
+      at: rows.reduce((m, r) => (r.refreshedAt > m ? r.refreshedAt : m), ''),
+      projects: rows,
+      waiting: JSON.parse(readFileSync(a['previous-waiting'], 'utf8')) as WaitingRow[],
+      report: [],
+    };
+  }
   const s = refresh({
     projects: JSON.parse(readFileSync(a.projects, 'utf8')),
     folders,

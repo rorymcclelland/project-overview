@@ -182,3 +182,21 @@ test('O1-1: a branch deleted since the last refresh no longer counts', () => {
   git(r, ['checkout', '-q', 'main']); git(r, ['branch', '-q', '-D', 'sprint-5']);
   assert.equal(go().activityWhere, 'branch main');
 });
+
+test('O1-4 case 3: without your PC, a first record carries over from the last refresh, and the folder project is marked not refreshed', () => {
+  const first = tmp(); writeFileSync(join(first, 'lantern.json'), rec({ writtenAt: '2026-11-06T10:00:00Z' }));
+  const folder = tmp(); mkdirSync(join(folder, 'docs'), { recursive: true });
+  const r = repo({ main: { at: '2026-11-05T10:00:00Z' } });
+  const projects = [project([{ git: r }]), project([{ folder: 'scout' }], 'scout')];
+  writeFileSync(join(first, 'scout.json'), rec({ writtenAt: '2026-11-06T10:00:00Z' }, 'scout'));
+  const onPc = run(projects, { firstRecords: first, folders: { scout: folder } });
+  const cloud = run(projects, { previous: onPc });
+  const l = cloud.projects.find((p) => p.id === 'lantern')!;
+  assert.equal(l.source, 'first record');
+  assert.equal(l.noRecord, false);
+  assert.equal(l.refreshedOk, true);
+  assert.equal(cloud.waiting.filter((w) => w.projectId === 'lantern').length, 1);
+  const s = cloud.projects.find((p) => p.id === 'scout')!;
+  assert.equal(s.refreshedOk, false);
+  assert.equal(s.writtenAt, '2026-11-06T10:00:00Z');
+});
