@@ -117,6 +117,11 @@ function time(value: string): string {
 function own(table: Record<string, string>, key: string): string {
   return Object.prototype.hasOwnProperty.call(table, key) ? table[key] : key;
 }
+/** Whole UK calendar days from a date or moment to now; null if it is not a date. */
+export function ukDaysSince(from: string, now: Date): number | null {
+  const d = moment(from);
+  return d ? daysBetween(d.toISOString(), now) : null;
+}
 function daysBetween(from: string, now: Date): number {
   const a = Date.parse(`${ukDayKey.format(new Date(from))}T00:00:00Z`);
   const b = Date.parse(`${ukDayKey.format(now)}T00:00:00Z`);

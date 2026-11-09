@@ -7,11 +7,16 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 
-export function buildCardScript(): string {
-  const source = readFileSync(new URL('../src/card.ts', import.meta.url), 'utf8');
+function toScript(file: string): string {
+  const source = readFileSync(new URL(`../src/${file}`, import.meta.url), 'utf8');
   const js = ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2020, module: ts.ModuleKind.ESNext } }).outputText;
-  const body = js.replace(/^export \{\};?\s*$/m, '').replace(/^export /gm, '');
-  return `// Built from src/card.ts by scripts/build-page.ts. Do not edit here.\nwindow.OverviewCard = (() => {\n${body}\nreturn { toCard, orderCards };\n})();\n`;
+  // One shared scope: imports between the two files become plain references.
+  return js.replace(/^import .*$/gm, '').replace(/^export \{\};?\s*$/m, '').replace(/^export /gm, '');
+}
+
+/** card.ts and inbox.ts as one plain script, setting window.OverviewCard and window.OverviewInbox. */
+export function buildCardScript(): string {
+  return `// Built from src/card.ts and src/inbox.ts by scripts/build-page.ts. Do not edit here.\n(() => {\n${toScript('card.ts')}\n${toScript('inbox.ts')}\nwindow.OverviewCard = { toCard, orderCards };\nwindow.OverviewInbox = { toInbox, filterInbox, OVERDUE_DAYS };\n})();\n`;
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

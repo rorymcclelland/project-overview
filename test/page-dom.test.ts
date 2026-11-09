@@ -24,7 +24,10 @@ function render(projects: ProjectRow[], waiting: WaitingRow[]) {
   w.dash = {
     data: (id: string) => data[id] ? { status: 'ok', data: data[id] } : calcs[id] ? { status: 'ok', data: calcs[id].fn(...calcs[id].inputs.map((i) => data[i])) } : { status: 'missing', data: [] },
     calc: (id: string, c: { inputs: string[]; fn: (...a: unknown[]) => unknown }) => { calcs[id] = c; },
-    draw: (name: string, fn: (el: Element) => void) => { draws.push([name, fn]); },
+    draw: (name: string, fn?: (el: Element) => void) => {
+      if (fn) draws.push([name, fn]);
+      else for (const [n, f] of draws) if (n === name) w.document.querySelectorAll(`[data-draw="${n}"]`).forEach((el) => f(el));
+    },
   };
   w.eval(buildCardScript());
   for (const s of w.document.querySelectorAll('script')) w.eval(s.textContent ?? '');
@@ -66,4 +69,44 @@ test('Demo finding: a card with no record has no empty line where its age would 
   const doc = render([row({ id: 'n', name: 'N', noRecord: true, writtenAt: null, lastActivity: null, sprint: null, stage: null, stories: null })], []);
   const empty = [...doc.querySelectorAll('.po-card p')].filter((p) => !(p.textContent ?? '').trim());
   assert.equal(empty.length, 0);
+});
+
+// Dates relative to today, so the test means the same whatever day it runs.
+const daysAgo = (n: number) => new Date(Date.now() - n * 86_400_000).toISOString().slice(0, 10);
+const inboxProjects = [row({ id: 'a', name: 'Alpha', waiting: 2 }), row({ id: 'b', name: 'Beta', waiting: 1 })];
+const inboxWaiting: WaitingRow[] = [
+  { projectId: 'a', id: 'A1', type: 'question', text: 'old one', recommendation: 'Do it.', askedOn: daysAgo(30), source: null },
+  { projectId: 'a', id: 'A2', type: 'hand-check', text: '<b>new</b> one', recommendation: null, askedOn: daysAgo(0), source: null },
+  { projectId: 'b', id: 'B1', type: 'question', text: 'middle', recommendation: null, askedOn: daysAgo(4), source: null },
+];
+
+test('O2-2 cases 1, 2, 4 and 8: the inbox sits above the cards, oldest first, old items marked, totals match the cards', () => {
+  const doc = render(inboxProjects, inboxWaiting);
+  const inbox = doc.querySelector('#inbox')!;
+  const cards = doc.querySelector('#projects')!;
+  assert.ok(inbox.compareDocumentPosition(cards) & 4, 'inbox comes before the cards');
+  const items = [...inbox.querySelectorAll('.po-inbox-item')];
+  assert.deepEqual(items.map((i) => i.querySelector('.po-inbox-text')!.textContent), ['old one', 'middle', '<b>new</b> one']);
+  assert.equal(items.filter((i) => i.classList.contains('po-overdue')).length, 1, 'only the 30-day-old item');
+  const cardSum = [...doc.querySelectorAll('.po-card .po-count')].reduce((n, e) => n + Number(e.textContent), 0);
+  assert.equal(items.length, cardSum);
+  assert.equal(doc.querySelectorAll('#inbox b, #inbox img').length, 0, 'markup is text');
+});
+
+test('O2-2 case 5: pressing a type shows only that type and says how many are hidden; All shows everything', () => {
+  const doc = render(inboxProjects, inboxWaiting);
+  const button = (label: RegExp) => [...doc.querySelectorAll('#inbox .po-filter button')].find((b) => label.test(b.textContent ?? '')) as HTMLButtonElement;
+  button(/^Question/).click();
+  assert.deepEqual([...doc.querySelectorAll('.po-inbox-item .po-inbox-text')].map((e) => e.textContent), ['old one', 'middle']);
+  assert.match(doc.querySelector('#inbox .po-inbox-note')!.textContent ?? '', /1 hidden/);
+  assert.equal(button(/^Question/).getAttribute('aria-pressed'), 'true');
+  button(/^All/).click();
+  assert.equal(doc.querySelectorAll('.po-inbox-item').length, 3);
+});
+
+test('O2-2 case 6: each item links to its project\'s card on the same page', () => {
+  const doc = render(inboxProjects, inboxWaiting);
+  const links = [...doc.querySelectorAll('.po-inbox-item a.po-inbox-project')];
+  assert.deepEqual(links.map((a) => a.getAttribute('href')), ['#project-a', '#project-b', '#project-a']);
+  for (const a of links) assert.ok(doc.getElementById(a.getAttribute('href')!.slice(1)), 'the card exists');
 });

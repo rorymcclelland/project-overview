@@ -19,7 +19,7 @@ window.dash = {
     return { status: 'missing', data: [] };
   },
   calc(id, c) { calcs[id] = c; },
-  draw(name, fn) { draws.push([name, fn]); },
+  draw(name, fn) { if (fn) draws.push([name, fn]); else for (const [n, f] of draws) if (n === name) document.querySelectorAll('[data-draw="' + n + '"]').forEach((el) => f(el)); },
   onData(fn) { fn(); },
 };
 window.addEventListener('DOMContentLoaded', () => {
