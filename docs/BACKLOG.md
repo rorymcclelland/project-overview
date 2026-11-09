@@ -45,22 +45,45 @@ Refinement: `docs/refinement/sprint-0.md`. Demo: `docs/testing/sprint-0-demo.md`
 | R12 | A record ages as soon as its project moves on | Sprint 0 review; folded into O1-3, Sprint 1 |
 | F-4 | Waiting items include test packs only Rory can run; added a `hand-check` type to the format | Done, Sprint 0 (O0-3) |
 
-## Sprint 1: one view I can trust (refined and built 9 November 2026, awaiting Rory's sign-off)
+## Sprint 1: one view I can trust (closed 9 November 2026, signed off by Rory)
 
 Refinement: `docs/refinement/sprint-1.md`. Demo: `docs/testing/sprint-1-demo.md`. Dashboard: the private artifact "Project overview"; refresh: `docs/refresh.md`.
 
 | ID | Story | Acceptance criteria (summary) | Size | Status |
 |---|---|---|---|---|
-| O1-1 | The refresh | Gathers each project's newest record from wherever it lives (any branch, Rory's PC, or the first records), checks it, and puts it in the page; folds in F-2 and F-3 | M | Built, Sprint 1: awaiting sign-off |
-| O1-2 | The page | A private dashboard with one card per project: sprint, stage and since when, last activity, links, how many things wait on Rory; the website as a lighter card | M | Built, Sprint 1: awaiting sign-off |
-| O1-3 | Nothing stale passes as current | Every card says how old its record is and flags a project that has moved on since; a missing or refused record is shown as such, with the reason; folds in R12 | S | Built, Sprint 1: awaiting sign-off |
-| O1-4 | Refresh without asking | The refresh runs on a schedule as well as on request | S | Built, Sprint 1: awaiting sign-off |
+| O1-1 | The refresh | Gathers each project's newest record from wherever it lives (any branch, Rory's PC, or the first records), checks it, and puts it in the page; folds in F-2 and F-3 | M | Done, Sprint 1 |
+| O1-2 | The page | A private dashboard with one card per project: sprint, stage and since when, last activity, links, how many things wait on Rory; the website as a lighter card | M | Done, Sprint 1 |
+| O1-3 | Nothing stale passes as current | Every card says how old its record is and flags a project that has moved on since; a missing or refused record is shown as such, with the reason; folds in R12 | S | Done, Sprint 1 |
+| O1-4 | Refresh without asking | The refresh runs on a schedule as well as on request | S | Done, Sprint 1 |
+
+### Sprint 1 review (9 November 2026)
+
+**Checks, with evidence.** CI green (run 42606537810, build `5a9faee`); 90 automated tests. A real refresh of all five projects at 11:07; a scheduled run at 10:55 and the 13:30 run both updated the dashboard by themselves. Rory opened the dashboard at 16:47: nothing failed to load, and Studio's card correctly warned it had moved on since its record. Independent review: 13 findings (S1 to S13), all fixed with a test each; one more found in the demo, fixed. Demo page published as a private artifact.
+
+**All four stories Done, Sprint 1.** One change from the refinement: two tables (projects, waiting items) instead of one file per project. Nothing returned.
+
+**From the review conversation (Rory, 9 November 2026).** The data should be as close to live as possible. A GitHub MCP connector exists (made by GitHub) but is not connected on Rory's account; the built-in GitHub Integration, which adds repository files to chats and projects, cannot feed the dashboard. Agreed: update-on-change goes into Sprint 2; live reading from GitHub is a candidate after Sprint 2 (O-L1 below).
+
+**Proposed for Sprint 2** (re-ranked at the close): O2-1 update on change (quick win, first), O2-2 the inbox, and the spike S2-A on saving answers in the page, which Sprint 3 is refined against. Rory confirms at the start of Sprint 2.
+
+## Sprint 2: what is waiting on me (proposed)
+
+| ID | Story | Acceptance criteria (summary) | Size | Status |
+|---|---|---|---|---|
+| O2-1 | Update on change | Whenever a project's session writes its status record (sprint-refine, sprint-close, the website's routine), it refreshes the dashboard straight away; the two daily runs stay as a safety net. Covers all five projects, Job Scout included | S | Planned, Sprint 2 |
+| O2-2 | The inbox | One list of everything waiting on Rory across projects, oldest first, by type, each linked to its project's card | M | Planned, Sprint 2 |
+| S2-A | Spike: saving answers in the page | Try, on a copy, whether the dashboard can save what Rory types when he presses a control, and how a project's session reads it back. Answers Sprint 3's design | S | Planned, Sprint 2 (spike) |
+
+## Candidates after Sprint 2
+
+| ID | Item | Before it can start | Size |
+|---|---|---|---|
+| O-L1 | Live from GitHub: the dashboard reads RFI Respond, Studio, the task app and the website directly from GitHub each time it is opened, so "moved on" shows the moment anyone commits; update on change still covers Job Scout | Rory connects the GitHub MCP connector, read-only tool permissions; each project keeps its record in one fixed place (not only on sprint branches); the checker runs in the page. Job Scout only once its work is pushed to its private repo regularly (F-1) | L (about a sprint) |
 
 ## Later sprints (one line each; refined just in time)
 
 | Sprint | Goal |
 |---|---|
-| 2 | What is waiting on me: one inbox of open questions, demos awaiting sign-off and live deploys awaiting approval, oldest first |
 | 3 | Answer in place: answer a question here; the project's next session records it in its refinement file |
 | 4 | Progress charts: stories done per sprint, items carried over, burn-up towards each goal |
 | 5 | Spend, running costs: AI API usage and hosting per project, monthly forecast |
