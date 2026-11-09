@@ -9,11 +9,12 @@
 // The previous refresh is either its summary.json (on Rory's PC) or the two tables
 // the dashboard holds (when his PC is not connected; docs/refresh.md).
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { existsSync, lstatSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
-import { checkRecord } from '../src/checkStatus.ts';
+import { checkRecord, MAX_RECORD_BYTES } from '../src/checkStatus.ts';
 import type { ProjectRow, WaitingRow } from '../src/card.ts';
 
 export type Source = { git: string } | { folder: string };
@@ -45,11 +46,17 @@ const MOVED_ON_AFTER_MS = 60 * 60 * 1000;
 const BRANCH = /^[A-Za-z0-9._/-]{1,200}$/;
 /** Branches that hold CI output (test results and recordings), not project work. */
 const IGNORED_BRANCH = /^e2e-results\//;
+/** More branches than any real project has; beyond it a repo is read only in part. */
+const MAX_BRANCHES = 200;
+/** Only these are fetched: https, or a local folder (the tests' stand-in repos). */
+const ALLOWED_SOURCE = /^(https:\/\/[A-Za-z0-9.-]+\/[A-Za-z0-9._/-]+|\/[^\0]*)$/;
 
 interface Candidate {
   label: string;
   text: string;
   first: boolean;
+  /** When the place it was found last changed: a refusal with no readable date is dated by this. */
+  changedAt: string | null;
 }
 interface Activity {
   at: string;
@@ -67,16 +74,17 @@ function gitRun(args: string[], cwd?: string): string {
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', 'pipe'],
     timeout: 120_000,
-    env: { ...process.env, GIT_TERMINAL_PROMPT: '0' },
+    // No settings from Rory's own git setup (such as address rewrites) reach these calls.
+    env: { ...process.env, GIT_TERMINAL_PROMPT: '0', GIT_CONFIG_GLOBAL: '/dev/null', GIT_CONFIG_NOSYSTEM: '1', GIT_ALLOW_PROTOCOL: 'https:file' },
     maxBuffer: 20_000_000,
   });
 }
 
 /** Every branch's status record and newest commit, from a shallow copy kept in the cache. */
 function gatherGit(url: string, cache: string): Gathered {
-  // A source that looks like an option would be read by git as one.
-  if (url.startsWith('-')) return { candidates: [], activity: [], reachable: false };
-  const dir = join(cache, Buffer.from(url).toString('base64url').slice(0, 80));
+  // Only https addresses or local folders; anything else (an option, ssh, ext::) is not fetched.
+  if (!ALLOWED_SOURCE.test(url)) return { candidates: [], activity: [], reachable: false };
+  const dir = join(cache, createHash('sha256').update(url).digest('hex'));
   let heads: string[];
   try {
     if (!existsSync(join(dir, 'HEAD'))) {
@@ -90,7 +98,8 @@ function gatherGit(url: string, cache: string): Gathered {
     heads = gitRun(['-C', dir, 'ls-remote', '--heads', 'origin'])
       .split('\n')
       .map((l) => l.split('\t')[1]?.replace(/^refs\/heads\//, ''))
-      .filter((b): b is string => !!b && BRANCH.test(b) && !b.includes('..') && !IGNORED_BRANCH.test(b));
+      .filter((b): b is string => !!b && BRANCH.test(b) && !b.includes('..') && !IGNORED_BRANCH.test(b))
+      .slice(0, MAX_BRANCHES);
     if (heads.length)
       gitRun(['-C', dir, 'fetch', '-q', '--depth', '1', '--no-tags', '--force', '--filter=blob:none', 'origin',
         ...heads.map((b) => `+refs/heads/${b}:refs/heads/${b}`)]);
@@ -105,16 +114,31 @@ function gatherGit(url: string, cache: string): Gathered {
   const activity: Activity[] = [];
   for (const b of branches) {
     const ref = `refs/heads/${b}`;
+    let changedAt: string | null = null;
     try {
       const at = gitRun(['-C', dir, 'log', '-1', '--format=%cI', ref, '--']).trim();
-      if (at) activity.push({ at: new Date(at).toISOString().replace(/\.\d{3}Z$/, 'Z'), where: `branch ${b}` });
+      if (at) {
+        changedAt = new Date(at).toISOString().replace(/\.\d{3}Z$/, 'Z');
+        activity.push({ at: changedAt, where: `branch ${b}` });
+      }
     } catch {
       /* a branch with no readable commit adds no activity */
     }
+    let size = -1;
     try {
-      candidates.push({ label: `branch ${b}`, text: gitRun(['-C', dir, 'show', `${ref}:docs/status.json`]), first: false });
+      size = Number(gitRun(['-C', dir, 'cat-file', '-s', `${ref}:docs/status.json`]).trim());
     } catch {
       /* no record on this branch */
+    }
+    if (size > MAX_RECORD_BYTES) {
+      // Too large to read: let the checker refuse it, with its own words.
+      candidates.push({ label: `branch ${b}`, text: ' '.repeat(MAX_RECORD_BYTES + 1), first: false, changedAt });
+    } else if (size >= 0) {
+      try {
+        candidates.push({ label: `branch ${b}`, text: gitRun(['-C', dir, 'show', `${ref}:docs/status.json`]), first: false, changedAt });
+      } catch {
+        /* unreadable: treated as no record */
+      }
     }
   }
   return { candidates, activity, reachable: true };
@@ -124,10 +148,21 @@ function newestFile(root: string): Activity | null {
   let best: Activity | null = null;
   const walk = (dir: string, depth: number) => {
     if (depth > 6) return;
-    for (const name of readdirSync(dir)) {
+    let names: string[];
+    try {
+      names = readdirSync(dir);
+    } catch {
+      return;
+    }
+    for (const name of names) {
       if (name.startsWith('.') || name === 'node_modules') continue;
       const p = join(dir, name);
-      const s = statSync(p);
+      let s;
+      try {
+        s = lstatSync(p); // a link is not followed, and a broken one is skipped
+      } catch {
+        continue;
+      }
       if (s.isDirectory()) walk(p, depth + 1);
       else if (s.isFile() && (!best || s.mtime.toISOString() > best.at))
         best = { at: s.mtime.toISOString().replace(/\.\d{3}Z$/, 'Z'), where: relative(join(root, '..'), p).split('\\').join('/') };
@@ -139,10 +174,21 @@ function newestFile(root: string): Activity | null {
 
 /** A connected folder's record, and the newest change in its docs folder. */
 function gatherFolder(path: string | undefined): Gathered {
-  if (!path || !existsSync(path)) return { candidates: [], activity: [], reachable: false };
+  if (!path || path.includes('\0') || !existsSync(path)) return { candidates: [], activity: [], reachable: false };
   const candidates: Candidate[] = [];
   const file = join(path, 'docs', 'status.json');
-  if (existsSync(file)) candidates.push({ label: 'folder', text: readFileSync(file, 'utf8'), first: false });
+  let st;
+  try {
+    st = lstatSync(file);
+  } catch {
+    st = null;
+  }
+  // Only a plain file: a folder or a link (which could point anywhere) is not read.
+  if (st?.isFile()) {
+    const changedAt = st.mtime.toISOString().replace(/\.\d{3}Z$/, 'Z');
+    const text = st.size > MAX_RECORD_BYTES ? ' '.repeat(MAX_RECORD_BYTES + 1) : readFileSync(file, 'utf8');
+    candidates.push({ label: 'folder', text, first: false, changedAt });
+  }
   const docs = join(path, 'docs');
   const newest = existsSync(docs) ? newestFile(docs) : null;
   return { candidates, activity: newest ? [newest] : [], reachable: true };
@@ -197,13 +243,54 @@ function emptyRow(cfg: ProjectConfig, now: string): ProjectRow {
   };
 }
 
+const STAGES = new Set(['refining', 'awaiting-answers', 'ready', 'building', 'awaiting-signoff', 'closed']);
+const TYPES = new Set(['question', 'demo-signoff', 'deploy-approval', 'hand-check', 'account-step']);
+const isDate = (v: unknown) => typeof v === 'string' && v.length <= 40 && !Number.isNaN(Date.parse(v));
+const textOrNull = (v: unknown) => v === null || (typeof v === 'string' && v.length <= 4000);
+
+/** Rows from a previous refresh may come back from the dashboard, so each is checked before use. */
+export function validProjectRow(r: unknown): r is ProjectRow {
+  const x = r as Record<string, unknown>;
+  return !!x && typeof x === 'object' && typeof x.id === 'string' && typeof x.name === 'string' &&
+    (x.kind === 'sprint' || x.kind === 'kanban') && Number.isInteger(x.waiting) && (x.waiting as number) >= 0 &&
+    (x.stage === null || STAGES.has(x.stage as string)) && (x.writtenAt === null || isDate(x.writtenAt)) &&
+    isDate(x.refreshedAt) && (x.lastRefreshedOk === null || isDate(x.lastRefreshedOk)) &&
+    (x.stories === null || Number.isInteger(x.stories)) && typeof x.noRecord === 'boolean' &&
+    typeof x.refreshedOk === 'boolean' && typeof x.movedOn === 'boolean' &&
+    ['sprint', 'sprintTitle', 'stageSince', 'lastActivity', 'source', 'activityAt', 'activityWhere', 'refused', 'notes', 'repo', 'demo', 'live', 'backlog'].every((k) => textOrNull(x[k]));
+}
+export function validWaitingRow(r: unknown): r is WaitingRow {
+  const x = r as Record<string, unknown>;
+  return !!x && typeof x === 'object' && typeof x.projectId === 'string' && typeof x.id === 'string' && TYPES.has(x.type as string) &&
+    typeof x.text === 'string' && x.text.length <= 4000 && isDate(x.askedOn) && textOrNull(x.recommendation) && textOrNull(x.source);
+}
+
 export function refresh(o: Options): Summary {
+  const previous = o.previous && {
+    ...o.previous,
+    projects: (Array.isArray(o.previous.projects) ? o.previous.projects : []).filter(validProjectRow),
+    waiting: (Array.isArray(o.previous.waiting) ? o.previous.waiting : []).filter(validWaitingRow),
+  };
+  o = { ...o, previous };
   const now = o.now.toISOString().replace(/\.\d{3}Z$/, 'Z');
   const projects: ProjectRow[] = [];
   const waiting: WaitingRow[] = [];
   const report: string[] = [];
 
   for (const cfg of o.projects) {
+    try {
+      refreshOne(cfg);
+    } catch (e) {
+      // Whatever went wrong stays with this project: keep its last refresh, say so, go on.
+      const prevRow = o.previous?.projects.find((p) => p.id === cfg.id);
+      projects.push(prevRow ? { ...prevRow, refreshedOk: false, refreshedAt: now } : { ...emptyRow(cfg, now), refreshedOk: false, lastRefreshedOk: null });
+      waiting.push(...(prevRow ? (o.previous?.waiting.filter((w) => w.projectId === cfg.id) ?? []) : []));
+      report.push(`${cfg.name}: not refreshed, an error stopped it (${String((e as Error)?.message ?? e).split('\n')[0].slice(0, 200)}).`);
+    }
+  }
+  return { at: now, projects, waiting, report };
+
+  function refreshOne(cfg: ProjectConfig) {
     const prevRow = o.previous?.projects.find((p) => p.id === cfg.id);
     const prevWaiting = o.previous?.waiting.filter((w) => w.projectId === cfg.id) ?? [];
     const gathered = cfg.sources.map((s) => ('git' in s ? gatherGit(s.git, o.cacheDir) : gatherFolder(o.folders[s.folder])));
@@ -211,7 +298,7 @@ export function refresh(o: Options): Summary {
     const candidates = gathered.flatMap((g) => g.candidates);
     const activity = gathered.flatMap((g) => g.activity);
     const firstFile = o.firstRecords ? join(o.firstRecords, `${cfg.id}.json`) : null;
-    if (firstFile && existsSync(firstFile)) candidates.push({ label: 'first record', text: readFileSync(firstFile, 'utf8'), first: true });
+    if (firstFile && existsSync(firstFile)) candidates.push({ label: 'first record', text: readFileSync(firstFile, 'utf8'), first: true, changedAt: null });
 
     // Check every candidate; keep the valid ones for this project.
     const valid: { c: Candidate; r: Rec }[] = [];
@@ -224,7 +311,7 @@ export function refresh(o: Options): Summary {
       } catch {
         /* reported by the checker */
       }
-      const at = typeof parsed?.writtenAt === 'string' ? parsed.writtenAt : '';
+      const at = typeof parsed?.writtenAt === 'string' && !Number.isNaN(Date.parse(parsed.writtenAt)) ? parsed.writtenAt : (c.changedAt ?? '');
       if (!res.ok) refusals.push({ c, at, msg: res.errors[0] });
       else if (parsed?.project?.id !== cfg.id)
         refusals.push({ c, at, msg: `the record is for another project ("${String(parsed?.project?.id).replace(/[^a-z0-9-]/g, '?')}"), not ${cfg.id}.` });
@@ -234,7 +321,7 @@ export function refresh(o: Options): Summary {
     const best = valid[0];
     // The newest refusal newer than what is shown (or any, if nothing is shown).
     const newerRefusal = refusals
-      .filter((x) => !best || !x.at || Date.parse(x.at) > Date.parse(best.r.writtenAt))
+      .filter((x) => !best || (!!x.at && Date.parse(x.at) > Date.parse(best.r.writtenAt)))
       .sort((a, b) => b.at.localeCompare(a.at))[0];
 
     let row: ProjectRow;
@@ -257,10 +344,10 @@ export function refresh(o: Options): Summary {
       }
       const changed = !prevRow ? 'new' : prevRow.writtenAt === row.writtenAt && prevRow.source === row.source ? 'unchanged' : 'changed';
       report.push(`${cfg.name}: ${row.source}, record of ${row.writtenAt} (${changed})${reachable ? '' : '; part of its source could not be reached'}.`);
-    } else if (!o.firstRecords && prevRow?.source === 'first record' && !newerRefusal) {
+    } else if (!o.firstRecords && prevRow?.source === 'first record') {
       // The first records are on Rory's PC; when it is not connected, a first record
       // (which never changes) carries over from the last refresh as it was.
-      row = { ...prevRow, refreshedOk: reachable, refreshedAt: now, lastRefreshedOk: reachable ? now : prevRow.lastRefreshedOk };
+      row = { ...prevRow, refreshedOk: reachable, refreshedAt: now, lastRefreshedOk: reachable ? now : prevRow.lastRefreshedOk, refused: newerRefusal?.msg ?? null };
       rows = prevWaiting;
       report.push(`${cfg.name}: first record, record of ${row.writtenAt} (unchanged; carried over).`);
     } else if (prevRow && prevRow.writtenAt) {
@@ -284,7 +371,6 @@ export function refresh(o: Options): Summary {
     projects.push(row);
     waiting.push(...rows);
   }
-  return { at: now, projects, waiting, report };
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

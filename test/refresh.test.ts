@@ -104,6 +104,8 @@ test('O1-1 case 7: an unreachable repo keeps the last refresh, marked not refres
   assert.equal(lantern.refreshedOk, false);
   assert.equal(lantern.writtenAt, '2026-11-08T17:30:00Z');
   assert.equal(lantern.lastRefreshedOk, previous.at);
+  assert.equal(lantern.noRecord, false, 'kept as it was, not "no current record"');
+  assert.equal(lantern.source, 'branch main');
   assert.equal(s.waiting.filter((x) => x.projectId === 'lantern').length, 1);
   assert.equal(s.projects.find((p) => p.id === 'other')!.refreshedOk, true);
 });

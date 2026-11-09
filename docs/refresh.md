@@ -35,7 +35,7 @@ Never put a refresh's output in the repository: it holds Job Scout's private det
 
 1. `upload_asset` both files to the dashboard (names `projects.json`, `waiting.json`).
 2. `db_get` `datasets/projects` and `datasets/waiting` for their versions and current file addresses.
-3. One `db_write` with an `update` of each: `source.url` to the new address, `updated` to `{at: <the refresh's time>, by: "Refresh by Claude, from each project's records"}`, `edit` to `{via: "claude", at: <now>}`, each with its `ifVersion`.
+3. One `db_write` with an `update` of each: `source.url` to the new address, `updated` to `{at: <the refresh's time>, by: "Refresh by Claude, from each project's records"}`, `edit` to `{via: "claude", at: <now>}` (the real time, from `date -u +%FT%TZ` just before the write, never a guess), each with its `ifVersion`.
 4. `delete_asset` each old file, once nothing names it.
 
 ## 3. Report

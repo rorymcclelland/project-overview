@@ -114,3 +114,29 @@ Order: O1-1 and `src/card.ts` first (tests first), then O1-2's page, then O1-3, 
 - **Q2:** (c). On request, and on a schedule twice each weekday: about 07:40 and 13:20 UK time.
 - **Q3:** (a). "Moved on" when the project's repo or folder has changes more than an hour newer than its record.
 - **Q4:** (a). Most things waiting on Rory first, then most recent activity.
+
+## Built (9 November 2026)
+
+- **One change from the refinement.** The refresh writes two tables, one row per project and one per item waiting on Rory, instead of one file per project, so every number on the page is marked with the table it came from (the Dashboard type's rule). Sources shows each table's age; each card shows its own record's age.
+- **Found while building.** The first real refresh fetched about 1 GB of CI recordings from RFI Respond's and Studio's `e2e-results/...` branches. Fixed: a partial copy fetches history only, each record when read (about 6 seconds, 1 MB); CI results branches are not counted as the project moving on. The corrected first records from Sprint 0's review had not reached Rory's PC (the copy reported success but wrote the old versions); copied again and checked by checksum.
+- **Scheduled refresh.** Two tasks, weekdays 07:41 and 13:19 UK time, using Rory's PC with its two folders, approval automatic. One fired on 9 November at 10:55: it refreshed the dashboard and removed the old files (O1-4 case 2).
+
+## Independent review (9 November 2026)
+
+An agent that did not build it ran 28 mutations (12 survived) and tried hostile inputs. Fixed the same day, each with a test written first (`test/sprint1-review.test.ts`, `test/page-dom.test.ts`, S1 to S13):
+
+| ID | Finding | Severity | Now |
+|---|---|---|---|
+| S1 | A broken link or odd file in a connected folder stopped the whole refresh | High | Fixed: each project is refreshed on its own; an error keeps its last refresh, marked not refreshed |
+| S2 | Two repos with long, similar addresses could share a cached copy | Medium | Fixed: the copy is named by a hash of the whole address |
+| S3 | A broken record on an old branch was always called "newer" | Medium | Fixed: a refusal is dated by its branch's last change |
+| S4 | Case 7's test did not notice the "keep the last refresh" path being removed | Medium | Fixed: the test checks it |
+| S5 | The page's wiring was checked by matching text, not by running it | Medium | Fixed: the page runs in a test browser with a stand-in dashboard |
+| S6 | A very large record was skipped silently | Low | Fixed: refused with the checker's reason |
+| S7 | A bad date or row from an old table could blank the page; old tables were not checked | Low | Fixed: rows checked before use; cards cope with bad values |
+| S8 | Built-in names (such as "constructor") were looked up as words | Low | Fixed |
+| S9 | "No current record" with both a refusal and an older record said only the refusal | Low | Fixed: says both |
+| S10 | Without Rory's PC, a refused newer record stopped a first record carrying over | Low | Fixed |
+| S11 | No limit on branches; some git calls outside error handling | Low | Fixed: at most 200 branches; every call inside the project's own error handling |
+| S12 | A status.json that is a link was followed | Low | Fixed: not followed |
+| S13 | Git ran with Rory's own git settings and any address form | Low | Fixed: no outside settings; https and local folders only |

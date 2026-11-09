@@ -100,12 +100,22 @@ const timeFmt = new Intl.DateTimeFormat('en-GB', { timeZone: UK, hour: '2-digit'
 const ukDayKey = new Intl.DateTimeFormat('en-CA', { timeZone: UK, year: 'numeric', month: '2-digit', day: '2-digit' });
 
 /** "8 Nov 2026" for a date (YYYY-MM-DD, read as that calendar day) or a moment (in UK time). */
-function day(value: string): string {
+function moment(value: string): Date | null {
   const d = /^\d{4}-\d{2}-\d{2}$/.test(value) ? new Date(`${value}T12:00:00Z`) : new Date(value);
-  return dayFmt.format(d).replace('Sept', 'Sep');
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+/** A value that is not a date (only possible in an old table) reads as such, never breaks the page. */
+function day(value: string): string {
+  const d = moment(value);
+  return d ? dayFmt.format(d).replace('Sept', 'Sep') : 'an unknown date';
 }
 function time(value: string): string {
-  return timeFmt.format(new Date(value));
+  const d = moment(value);
+  return d ? timeFmt.format(d) : 'an unknown time';
+}
+/** Looks up only the table's own words, never built-in names such as "constructor". */
+function own(table: Record<string, string>, key: string): string {
+  return Object.prototype.hasOwnProperty.call(table, key) ? table[key] : key;
 }
 function daysBetween(from: string, now: Date): number {
   const a = Date.parse(`${ukDayKey.format(new Date(from))}T00:00:00Z`);
@@ -134,7 +144,7 @@ export function toCard(p: ProjectRow, waiting: WaitingRow[], now: Date): Card {
   if (p.noRecord) {
     let text = 'No current record.';
     if (p.refused) text += ` The newest one was refused: ${p.refused}`;
-    else if (p.writtenAt) text += ` Showing the last valid record, from ${day(p.writtenAt)}, ${time(p.writtenAt)}.`;
+    if (p.writtenAt) text += ` Showing the last valid record, from ${day(p.writtenAt)}, ${time(p.writtenAt)}.`;
     flags.push({ kind: 'no-record', text });
   } else if (p.refused) {
     flags.push({ kind: 'newer-refused', text: `A newer record was refused, so this one is shown: ${p.refused}` });
@@ -153,7 +163,8 @@ export function toCard(p: ProjectRow, waiting: WaitingRow[], now: Date): Card {
     });
 
   let ageText: string | null = null;
-  if (p.writtenAt) {
+  if (p.writtenAt && !moment(p.writtenAt)) ageText = 'Record from an unknown date';
+  else if (p.writtenAt) {
     const n = daysBetween(p.writtenAt, now);
     ageText = `Record from ${day(p.writtenAt)}, ${time(p.writtenAt)}, ${n <= 0 ? 'today' : n === 1 ? '1 day ago' : `${n} days ago`}`;
   }
@@ -163,15 +174,15 @@ export function toCard(p: ProjectRow, waiting: WaitingRow[], now: Date): Card {
     name: p.name,
     kind: p.kind,
     sprintLine: sprintProject && p.sprint ? `Sprint ${p.sprint}${p.sprintTitle ? `: ${p.sprintTitle}` : ''}` : null,
-    stageText: sprintProject && p.stage ? (STAGE_WORDS[p.stage] ?? p.stage) : null,
+    stageText: sprintProject && p.stage ? own(STAGE_WORDS, String(p.stage)) : null,
     stageSince: sprintProject && p.stageSince ? `since ${day(p.stageSince)}` : null,
-    storiesText: sprintProject && p.stories !== null ? `${p.stories} ${p.stories === 1 ? 'story' : 'stories'}` : null,
+    storiesText: sprintProject && p.stories !== null && p.stories !== undefined ? `${p.stories} ${Number(p.stories) === 1 ? 'story' : 'stories'}` : null,
     lastActivityText: p.lastActivity ? `Last activity ${day(p.lastActivity)}` : null,
-    waitingCount: p.waiting,
+    waitingCount: Number(p.waiting) || 0,
     waitingSummary: counts.length ? counts.join(', ') : 'Nothing waiting on you',
     items: mine.map((x) => ({
       id: x.id,
-      typeLabel: TYPE_LABELS[x.type] ?? x.type,
+      typeLabel: own(TYPE_LABELS, String(x.type)),
       text: x.text,
       recommendation: x.recommendation,
       askedText: `Asked ${day(x.askedOn)}`,
