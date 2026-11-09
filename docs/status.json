@@ -5,48 +5,71 @@
     "name": "Project Overview",
     "kind": "sprint"
   },
-  "writtenAt": "2026-11-09T20:01:00Z",
-  "writtenBy": "Project Overview session, Sprint 2 demo",
+  "writtenAt": "2026-11-09T20:30:00Z",
+  "writtenBy": "Project Overview session, Sprint 3 refinement",
   "lastActivity": "2026-11-09",
   "links": {
     "repo": "https://github.com/rorymcclelland/project-overview",
-    "backlog": "https://github.com/rorymcclelland/project-overview/blob/main/docs/BACKLOG.md",
-    "demo": "https://github.com/rorymcclelland/project-overview/blob/main/docs/testing/sprint-2-demo.md"
+    "backlog": "https://github.com/rorymcclelland/project-overview/blob/main/docs/BACKLOG.md"
   },
   "sprint": {
-    "number": "2",
-    "title": "What is waiting on me",
-    "stage": "awaiting-signoff",
+    "number": "3",
+    "title": "Answer in place",
+    "stage": "awaiting-answers",
     "stageSince": "2026-11-09",
     "stories": [
       {
-        "id": "O2-1",
-        "title": "Update on change",
-        "size": "S",
-        "status": "Built, awaiting sign-off"
-      },
-      {
-        "id": "O2-2",
-        "title": "The inbox",
+        "id": "O3-1",
+        "title": "Answer from the inbox",
         "size": "M",
-        "status": "Built, awaiting sign-off"
+        "status": "Refined, awaiting answers"
       },
       {
-        "id": "S2-A",
-        "title": "Spike: saving answers in the page",
+        "id": "O3-2",
+        "title": "Projects pick up answers",
+        "size": "M",
+        "status": "Refined, awaiting answers"
+      },
+      {
+        "id": "O3-3",
+        "title": "Nothing answered gets lost",
         "size": "S",
-        "status": "Done, Sprint 2 (decision 0003)"
+        "status": "Refined, awaiting answers"
       }
     ]
   },
   "waiting": [
     {
-      "id": "D2",
-      "type": "demo-signoff",
-      "text": "Sprint 2 demo is ready for sign-off: the inbox, update on change, and the spike's decision on saving answers.",
-      "recommendation": "Sign off. F-5 stays open until the 07:41 run on 10 November confirms it.",
+      "id": "S3-Q1",
+      "type": "question",
+      "text": "Which items can you answer from the inbox?",
+      "recommendation": "Questions, demo sign-offs, and done for account steps and hand checks; live deploy approvals stay in GitHub.",
       "askedOn": "2026-11-09",
-      "source": "docs/testing/sprint-2-demo.md"
+      "source": "docs/refinement/sprint-3.md"
+    },
+    {
+      "id": "S3-Q2",
+      "type": "question",
+      "text": "When does a project pick up your answers?",
+      "recommendation": "At the start of every session in that project.",
+      "askedOn": "2026-11-09",
+      "source": "docs/refinement/sprint-3.md"
+    },
+    {
+      "id": "S3-Q3",
+      "type": "question",
+      "text": "Should saving an answer start anything in the project?",
+      "recommendation": "No: the answer waits for the project's next session, and the inbox shows it waiting.",
+      "askedOn": "2026-11-09",
+      "source": "docs/refinement/sprint-3.md"
+    },
+    {
+      "id": "S3-Q4",
+      "type": "question",
+      "text": "One button to agree with Claude's recommendation?",
+      "recommendation": "Yes, next to each recommendation; you can still type your own answer.",
+      "askedOn": "2026-11-09",
+      "source": "docs/refinement/sprint-3.md"
     }
   ],
   "history": [
@@ -66,6 +89,15 @@
       "closed": "2026-11-09",
       "planned": 4,
       "done": 4,
+      "returned": 0
+    },
+    {
+      "sprint": "2",
+      "title": "What is waiting on me",
+      "refined": "2026-11-09",
+      "closed": "2026-11-09",
+      "planned": 3,
+      "done": 3,
       "returned": 0
     }
   ]

@@ -44,6 +44,8 @@ Refinement: `docs/refinement/sprint-0.md`. Demo: `docs/testing/sprint-0-demo.md`
 | F-3 | Some current sources are not on GitHub at all: Job Scout's private folder, and possibly the task app's local copy (`C:\Data\code\task-manager`, not read) | Found in O0-3; folded into O1-1, Sprint 1 |
 | R12 | A record ages as soon as its project moves on | Sprint 0 review; folded into O1-3, Sprint 1 |
 | F-4 | Waiting items include test packs only Rory can run; added a `hand-check` type to the format | Done, Sprint 0 (O0-3) |
+| F-5 | Refreshes started while another session uses Rory's PC fall back to the cloud, so Job Scout reads "not refreshed" | Backlog, from Sprint 2 review. Check the 07:41 run on 10 November; if confirmed, a session using the PC runs the refresh itself (S) |
+| F-6 | The live dashboard ran an old card script after Sprint 1's review | Done, Sprint 2 (build stamp) |
 
 ## Sprint 1: one view I can trust (closed 9 November 2026, signed off by Rory)
 
@@ -66,15 +68,43 @@ Refinement: `docs/refinement/sprint-1.md`. Demo: `docs/testing/sprint-1-demo.md`
 
 **Proposed for Sprint 2** (re-ranked at the close): O2-1 update on change (quick win, first), O2-2 the inbox, and the spike S2-A on saving answers in the page, which Sprint 3 is refined against. Rory confirms at the start of Sprint 2.
 
-## Sprint 2: what is waiting on me (refined 9 November 2026)
+## Sprint 2: what is waiting on me (closed 9 November 2026, signed off by Rory)
 
-Refinement: `docs/refinement/sprint-2.md`
+Refinement: `docs/refinement/sprint-2.md`. Demo: `docs/testing/sprint-2-demo.md`.
 
 | ID | Story | Acceptance criteria (summary) | Size | Status |
 |---|---|---|---|---|
-| O2-1 | Update on change | Whenever a project's session writes its status record (sprint-refine, sprint-close, the website's routine), it refreshes the dashboard straight away; the two daily runs stay as a safety net. Covers all five projects, Job Scout included | S | Built, awaiting sign-off |
-| O2-2 | The inbox | One list of everything waiting on Rory across projects, oldest first, by type, each linked to its project's card | M | Built, awaiting sign-off |
+| O2-1 | Update on change | Whenever a project's session writes its status record (sprint-refine, sprint-close, the website's routine), it refreshes the dashboard straight away; the two daily runs stay as a safety net. Covers all five projects, Job Scout included | S | Done, Sprint 2. Residual: F-5, refreshes started while another session uses Rory's PC fall back to the cloud |
+| O2-2 | The inbox | One list of everything waiting on Rory across projects, oldest first, by type, each linked to its project's card | M | Done, Sprint 2 |
 | S2-A | Spike: saving answers in the page | Try, on a copy, whether the dashboard can save what Rory types when he presses a control, and how a project's session reads it back. Answers Sprint 3's design | S | Done, Sprint 2 (decision 0003) |
+
+### Sprint 2 review (9 November 2026)
+
+**Checks, with evidence.** CI green, 116 automated tests (build `f8253cf`). O2-1 by hand: a record shown 7 minutes after its commit; two overlapping refreshes both finished cleanly. O2-2: cases 1 to 8 in CI, case 9 by screenshots at 1200 and 400 px. Spike S2-A run by Rory at 19:55; result in decision 0003. Independent review: 11 findings (T1 to T11), nine fixed with a test each. Demo page published as a private artifact; Rory signed off at 20:13.
+
+**All three items Done, Sprint 2.** O2-1 carries F-5 as a residual. Nothing returned.
+
+**Where every review item now lives.**
+
+| Item | Now |
+|---|---|
+| F-5 Refreshes fall back to the cloud while another session uses Rory's PC | Open finding below; confirmed or not by the 07:41 run on 10 November |
+| F-6 Live dashboard ran an old card script | Done, Sprint 2 (build stamp on the page) |
+| T6 Update on change depends on the PC | Folded into F-5 |
+| T11 Duplicate waiting ids both show | Closed: the checker refuses duplicates in a record |
+| Spike S2-A result | Decision 0003; Sprint 3 refined against it |
+
+**Proposed for Sprint 3** (re-ranked at the close): answer in place, as planned, now designed by decision 0003. O-L1 stays a candidate until the GitHub connector is connected; spend and charts stay in their sprints.
+
+## Sprint 3: answer in place (refined 9 November 2026)
+
+Refinement: `docs/refinement/sprint-3.md`. Designed by decision 0003.
+
+| ID | Story | Acceptance criteria (summary) | Size | Status |
+|---|---|---|---|---|
+| O3-1 | Answer from the inbox | Answer an item where it is listed; saved privately to Rory, one per question; changeable until picked up; failures said plainly | M | Refined, awaiting answers (Q1, Q4) |
+| O3-2 | Projects pick up answers | A project's next session finds its answers, records them in its own files, marks them taken and clears them from the inbox | M | Refined, awaiting answers (Q2, Q3) |
+| O3-3 | Nothing answered gets lost | The inbox counts answers waiting for pickup and marks any waiting more than 7 days | S | Refined, awaiting answers |
 
 ## Candidates after Sprint 2
 
@@ -86,7 +116,6 @@ Refinement: `docs/refinement/sprint-2.md`
 
 | Sprint | Goal |
 |---|---|
-| 3 | Answer in place: answer a question here; the project's next session records it in its refinement file |
 | 4 | Progress charts: stories done per sprint, items carried over, burn-up towards each goal |
 | 5 | Spend, running costs: AI API usage and hosting per project, monthly forecast |
 | 6 | Spend, build cost and budgets: Claude plan split by sessions, cost per sprint, budgets with warnings |
