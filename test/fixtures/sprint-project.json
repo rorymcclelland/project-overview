@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "project": { "id": "lantern", "name": "Lantern (invented)", "kind": "sprint" },
+  "writtenAt": "2026-11-08T17:30:00Z",
+  "writtenBy": "sprint-close, Lantern session",
+  "lastActivity": "2026-11-08",
+  "links": { "repo": "https://github.com/example/lantern", "demo": "https://example.com/lantern/demo" },
+  "sprint": {
+    "number": "4",
+    "title": "Search that understands questions",
+    "stage": "awaiting-answers",
+    "stageSince": "2026-11-08",
+    "stories": [
+      { "id": "S4-1", "title": "Evaluation set", "size": "M", "status": "Ready" },
+      { "id": "S4-2", "title": "Ranked results", "size": "S", "status": "Refining" }
+    ]
+  },
+  "waiting": [
+    {
+      "id": "Q1",
+      "type": "question",
+      "text": "Which model should rank results?",
+      "recommendation": "The cheaper one, unless the evaluation shows a gap of more than 5 points.",
+      "askedOn": "2026-11-08",
+      "source": "docs/refinement/sprint-4.md"
+    }
+  ],
+  "history": [
+    { "sprint": "3", "title": "Sign-in", "refined": "2026-11-05", "closed": "2026-11-07", "planned": 5, "done": 4, "returned": 1 }
+  ]
+}

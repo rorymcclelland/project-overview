@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "project": { "id": "brochure", "name": "Brochure site (invented)", "kind": "kanban" },
+  "writtenAt": "2026-11-08T12:00:00Z",
+  "writtenBy": "website session",
+  "lastActivity": "2026-11-07",
+  "links": { "live": "https://example.com" },
+  "waiting": [
+    { "id": "W1", "type": "deploy-approval", "text": "New contact page ready to go live", "askedOn": "2026-11-07" }
+  ]
+}
