@@ -166,3 +166,19 @@ test('O1-1: the rows carry links, notes and a kanban project\'s empty sprint fie
   assert.equal(p.live, 'https://example.com'); assert.equal(p.waiting, 1);
   assert.equal(s.waiting[0].type, 'deploy-approval');
 });
+
+test('O1-3: commits on CI results branches (e2e-results/...) are not the project moving on', () => {
+  const r = repo({ main: { record: rec(), at: '2026-11-08T17:30:00Z' }, 'e2e-results/ci/main': { at: '2026-11-09T11:00:00Z' } });
+  const p = run([project([{ git: r }])]).projects[0];
+  assert.equal(p.movedOn, false);
+  assert.equal(p.activityWhere, 'branch main');
+});
+
+test('O1-1: a branch deleted since the last refresh no longer counts', () => {
+  const r = repo({ main: { record: rec(), at: '2026-11-08T17:30:00Z' }, 'sprint-5': { at: '2026-11-09T11:00:00Z' } });
+  const cacheDir = tmp();
+  const go = () => refresh({ projects: [project([{ git: r }])], folders: {}, now: NOW, cacheDir }).projects[0];
+  assert.equal(go().activityWhere, 'branch sprint-5');
+  git(r, ['checkout', '-q', 'main']); git(r, ['branch', '-q', '-D', 'sprint-5']);
+  assert.equal(go().activityWhere, 'branch main');
+});

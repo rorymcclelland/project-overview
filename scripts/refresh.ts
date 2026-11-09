@@ -40,6 +40,8 @@ interface Options {
 /** Activity within this long after a record is the work that wrote it, not moving on. */
 const MOVED_ON_AFTER_MS = 60 * 60 * 1000;
 const BRANCH = /^[A-Za-z0-9._/-]{1,200}$/;
+/** Branches that hold CI output (test results and recordings), not project work. */
+const IGNORED_BRANCH = /^e2e-results\//;
 
 interface Candidate {
   label: string;
@@ -72,18 +74,30 @@ function gatherGit(url: string, cache: string): Gathered {
   // A source that looks like an option would be read by git as one.
   if (url.startsWith('-')) return { candidates: [], activity: [], reachable: false };
   const dir = join(cache, Buffer.from(url).toString('base64url').slice(0, 80));
+  let heads: string[];
   try {
     if (!existsSync(join(dir, 'HEAD'))) {
       mkdirSync(dir, { recursive: true });
       gitRun(['init', '-q', '--bare', dir]);
+      // A partial copy: commits and folder listings now, each file only when it is read.
+      gitRun(['-C', dir, 'config', 'remote.origin.url', url]);
+      gitRun(['-C', dir, 'config', 'remote.origin.promisor', 'true']);
+      gitRun(['-C', dir, 'config', 'remote.origin.partialclonefilter', 'blob:none']);
     }
-    gitRun(['-C', dir, 'fetch', '-q', '--depth', '1', '--no-tags', '--prune', '--force', '--', url, '+refs/heads/*:refs/heads/*']);
+    heads = gitRun(['-C', dir, 'ls-remote', '--heads', 'origin'])
+      .split('\n')
+      .map((l) => l.split('\t')[1]?.replace(/^refs\/heads\//, ''))
+      .filter((b): b is string => !!b && BRANCH.test(b) && !b.includes('..') && !IGNORED_BRANCH.test(b));
+    if (heads.length)
+      gitRun(['-C', dir, 'fetch', '-q', '--depth', '1', '--no-tags', '--force', '--filter=blob:none', 'origin',
+        ...heads.map((b) => `+refs/heads/${b}:refs/heads/${b}`)]);
   } catch {
     return { candidates: [], activity: [], reachable: false };
   }
-  const branches = gitRun(['-C', dir, 'for-each-ref', '--format=%(refname:strip=2)', 'refs/heads/'])
-    .split('\n')
-    .filter((b) => b && BRANCH.test(b) && !b.includes('..'));
+  // Only branches that exist now: one deleted since the last refresh is dropped from the copy.
+  const local = gitRun(['-C', dir, 'for-each-ref', '--format=%(refname:strip=2)', 'refs/heads/']).split('\n').filter(Boolean);
+  for (const b of local) if (!heads.includes(b)) gitRun(['-C', dir, 'update-ref', '-d', `refs/heads/${b}`]);
+  const branches = heads;
   const candidates: Candidate[] = [];
   const activity: Activity[] = [];
   for (const b of branches) {
