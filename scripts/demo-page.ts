@@ -46,7 +46,7 @@ const cases: [string, string, string][] = [
   ['O0-4 case 1', 'The guide\'s worked example passes', resultFor('O0-4 case 1')],
   ['O0-4 case 2', 'Rory reviews and saves the skill changes', 'Waiting on you: the three review cards in the chat'],
 ];
-const review = [...results].filter(([n]) => /^R\d/.test(n));
+const review = [...results].filter(([n]) => /^(R|C)\d/.test(n));
 
 // The checker refusing real mistakes, run now.
 const base = JSON.parse(readFileSync('test/fixtures/sprint-project.json', 'utf8'));
@@ -117,7 +117,7 @@ th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);verti
 <div class="summary">
 <div class="stat"><b>${passed} of ${results.size}</b><span class="muted">automated tests passed in this build</span></div>
 <div class="stat"><b>${recordsPass} of ${files.length}</b><span class="muted">real records pass the checker</span></div>
-<div class="stat"><b>12 of 13</b><span class="muted">review findings fixed; 1 logged for Sprint 1</span></div>
+<div class="stat"><b>20 of 21</b><span class="muted">findings from two independent reviews fixed; 1 logged for Sprint 1</span></div>
 <div class="stat"><b>3</b><span class="muted">skill changes for you to save</span></div>
 </div>
 
@@ -135,7 +135,7 @@ ${cases.map(([c, w, r]) => `<tr><td><b>${esc(c)}</b></td><td>${esc(w)}</td><td>$
 <table><tr><th>Mistake</th><th>Result</th><th>Message</th></tr>${demos}</table>
 
 <h2>The independent review</h2>
-<p>An agent that did not build this checked the tests against the agreed cases, attacked the checker with hostile records, and checked every record against its sources. It found 1 high, 8 medium and 4 low problems, including a crash on deeply nested input and two inaccurate records. Twelve were fixed, each with a test written first; the thirteenth (a record ages as soon as its project moves on) is logged for Sprint 1's refresh.</p>
+<p>An agent that did not build this checked the tests against the agreed cases, attacked the checker with hostile records, and checked every record against its sources. It found 1 high, 8 medium and 4 low problems, including a crash on deeply nested input and two inaccurate records. Twelve were fixed, each with a test written first; the thirteenth (a record ages as soon as its project moves on) is logged for Sprint 1's refresh. A second agent then attacked the fixes themselves and found eight more gaps (C1 to C8), including hidden characters that could carry instructions to an AI; all are fixed and tested.</p>
 <table><tr><th>Test</th><th>Result</th></tr>${review.map(([n, ok]) => `<tr><td>${esc(n)}</td><td><span class="tag ${ok ? 'pass' : 'fail'}">${ok ? 'Passed' : 'Failed'}</span></td></tr>`).join('')}</table>
 
 <div class="ask"><h3>What I need from you</h3>

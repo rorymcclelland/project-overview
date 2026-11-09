@@ -128,3 +128,20 @@ An agent that did not build the work reviewed the tests against the agreed cases
 | R11 | Duplicate ids, closed before refined, unlimited notes, hour 24 and a Windows byte-order mark | Low | Fixed |
 | R12 | RFI Respond's sprint branch moved on after its record was written | Low | Expected: records are snapshots; Sprint 1's refresh must show their age (F-2) |
 | R13 | Studio's record said "second-last of 11"; its backlog now plans 12 | Medium | Fixed |
+
+## Second independent review (9 November 2026)
+
+A second agent, which built none of it, re-checked the R-fixes by attacking them with new inputs and removing each fix in turn. R1, R2, R6, R10 and R11 held. It found the rest, all fixed the same day, each with a test written first (`test/recheck-fixes.test.ts`, C1 to C8):
+
+| ID | Finding | Severity | Now |
+|---|---|---|---|
+| C1 | R3 only partly fixed: unknown field names, history dates and duplicate ids could still echo hostile input | Medium | Fixed: rules that quote values run only after the schema has passed; field names shortened and made safe |
+| C2 | R4 only partly fixed: some invisible characters counted as text; hidden tag characters (which can carry instructions to an AI) passed | Medium | Fixed: refused |
+| C3 | Four fixes had no test that failed when they were removed | Low | Fixed: each has its own test |
+| C4 | The secrets check missed unquoted passwords, tokens, AWS secret keys, Slack webhooks | Low | Fixed |
+| C5 | A time zone of +23:00 was accepted | Low | Fixed: -12:00 to +14:00 only |
+| C6 | Ports above 65535 and hosts such as `-` were accepted | Low | Fixed |
+| C7 | Disguised script and `data:text/html` links were not flagged | Low | Fixed |
+| C8 | A record with thousands of problems produced thousands of messages | Low | Fixed: at most 50, then a count |
+
+Not changed: links to internal addresses (such as 127.0.0.1) and encoded line breaks in a link's path are accepted. In Sprint 1 a link only opens in a new tab when Rory clicks it, so neither can do harm; revisit if the page ever fetches a link.

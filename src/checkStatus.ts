@@ -13,6 +13,12 @@ const MAX_DEPTH = 12;
 // eslint-disable-next-line no-control-regex -- finding control characters is the point
 const CONTROL = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F]/;
 const BIDI = /[\u061C\u200E\u200F\u202A-\u202E\u2066-\u2069]/;
+/** Characters that draw nothing: text made only of these (and spaces) is empty. */
+// eslint-disable-next-line no-misleading-character-class -- these are listed one by one on purpose
+const INVISIBLE = /[\s\u00AD\u034F\u115F\u1160\u17B4\u17B5\u180B-\u180F\u200B-\u200F\u2028\u2029\u202A-\u202E\u2060-\u206F\u3164\uFE00-\uFE0F\uFEFF\uFFA0]/gu;
+/** Unicode tag characters are invisible and can carry hidden instructions to an AI reading the text. */
+const TAGS = /[\u{E0000}-\u{E007F}]/u;
+const MAX_MESSAGES = 50;
 const LONE_SURROGATE = /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/;
 export const STAGES: readonly string[] = schema.properties.sprint.properties.stage.enum;
 
@@ -30,7 +36,7 @@ ajv.addFormat('date', {
 });
 ajv.addFormat('date-time', {
   validate: (s: string) =>
-    /^\d{4}-\d{2}-\d{2}T([01]\d|2[0-3]):[0-5]\d(:[0-5]\d(\.\d+)?)?(Z|[+-]([01]\d|2[0-3]):[0-5]\d)$/.test(s) &&
+    /^\d{4}-\d{2}-\d{2}T([01]\d|2[0-3]):[0-5]\d(:[0-5]\d(\.\d+)?)?(Z|\+((0\d|1[0-3]):[0-5]\d|14:00)|-((0\d|1[01]):[0-5]\d|12:00))$/.test(s) &&
     isRealDate(s.slice(0, 10)) && !Number.isNaN(Date.parse(s)),
 });
 const validate = ajv.compile(schema);
@@ -60,7 +66,7 @@ function explain(e: ErrorObject, record: unknown): string {
     }
     case 'additionalProperties': {
       const extra = (e.params as { additionalProperty: string }).additionalProperty;
-      return `${at ? `${at}.` : ''}${extra} is not a field of a version 1 record; remove it or check its spelling.`;
+      return `${at ? `${at}.` : ''}${shown(extra)} is not a field of a version 1 record; remove it or check its spelling.`;
     }
     case 'enum': {
       const allowed = (e.params as { allowedValues: unknown[] }).allowedValues.join(', ');
@@ -93,6 +99,12 @@ function shown(v: unknown): string {
   return `"${safe.length > 40 ? `${safe.slice(0, 40)}...` : safe}"`;
 }
 
+function capped(list: string[]): string[] {
+  return list.length > MAX_MESSAGES
+    ? [...list.slice(0, MAX_MESSAGES), `...and ${list.length - MAX_MESSAGES} more problems.`]
+    : list;
+}
+
 function depthOf(root: unknown): number {
   let max = 0;
   const stack: [unknown, number][] = [[root, 1]];
@@ -113,7 +125,7 @@ function valueAt(record: unknown, path: string): unknown {
   return v;
 }
 
-const MARKUP = /<[a-z!/?][^>]*>|javascript:|\bon[a-z]+\s*=/i;
+const MARKUP = /<[a-z!/?][^>]*>|java\s*script\s*:|&#|data:text\/html|\bon[a-z]+\s*=/i;
 
 function collectText(root: unknown): [string, string][] {
   const out: [string, string][] = [];
@@ -171,12 +183,7 @@ export function checkRecord(text: string, options: { now?: Date } = {}): CheckRe
     }
   }
 
-  // Rules the schema cannot express.
-  const links = rec.links;
-  if (links && typeof links === 'object')
-    for (const [k, u] of Object.entries(links))
-      if (typeof u === 'string' && /(^|[./])xn--/i.test(u.split('/')[2] ?? ''))
-        errors.push(`links.${k} uses an encoded international address, which can imitate another site; use the plain address.`);
+  const schemaOk = errors.length === 0;
 
   const project = rec.project as { kind?: string } | undefined;
   if (project?.kind === 'sprint' && rec.sprint === undefined)
@@ -185,6 +192,24 @@ export function checkRecord(text: string, options: { now?: Date } = {}): CheckRe
     errors.push('sprint must not be given for a kanban project, which has no sprints.');
   if (project?.kind === 'kanban' && rec.history !== undefined)
     errors.push('history must not be given for a kanban project, which has no sprints.');
+
+  // The rules below quote values, so they run only once the schema has shown every
+  // id, date and link is in its expected form: nothing hostile can reach a message.
+  if (!schemaOk) return { ok: false, errors: capped(errors), warnings };
+
+  for (const [k, u] of Object.entries(rec.links as Record<string, string>)) {
+    let host: string;
+    try {
+      host = new URL(u).hostname;
+    } catch {
+      errors.push(`links.${k} is not a working link.`);
+      continue;
+    }
+    if (/(^|\.)xn--/i.test(host))
+      errors.push(`links.${k} uses an encoded international address, which can imitate another site; use the plain address.`);
+    else if (!/^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$/i.test(host))
+      errors.push(`links.${k} does not name a real host.`);
+  }
 
   const written = typeof rec.writtenAt === 'string' ? Date.parse(rec.writtenAt) : NaN;
   if (!Number.isNaN(written)) {
@@ -235,14 +260,12 @@ export function checkRecord(text: string, options: { now?: Date } = {}): CheckRe
     storyIds.add(s.id);
   }
 
-  // Text is checked only once the record's shape is known to be sound.
-  if (errors.length === 0) {
-    for (const [path, value] of collectText(rec)) {
-      if (CONTROL.test(value) || BIDI.test(value) || LONE_SURROGATE.test(value))
-        errors.push(`${path} contains a control character, a text-direction override or a broken character; remove it.`);
-      else if (MARKUP.test(value)) warnings.push(`${path} contains markup; the page must show it as plain text, never run it.`);
-    }
+  for (const [path, value] of collectText(rec)) {
+    if (CONTROL.test(value) || BIDI.test(value) || LONE_SURROGATE.test(value) || TAGS.test(value))
+      errors.push(`${path} contains a control character, a text-direction override, a hidden tag character or a broken character; remove it.`);
+    else if (value.replace(INVISIBLE, '') === '') errors.push(`${path} has no visible character.`);
+    else if (MARKUP.test(value)) warnings.push(`${path} contains markup; the page must show it as plain text, never run it.`);
   }
 
-  return { ok: errors.length === 0, errors, warnings };
+  return { ok: errors.length === 0, errors: capped(errors), warnings: capped(warnings) };
 }
